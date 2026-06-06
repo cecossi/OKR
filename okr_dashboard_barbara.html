@@ -137,6 +137,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .obj-section{display:block!important;}
   .hist-body{display:block!important;}
 }
+
+/* SAVE BAR */
+.save-bar{display:flex;align-items:center;justify-content:space-between;background:#fff;border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 16px;margin-bottom:var(--gap);font-size:12px;flex-wrap:wrap;gap:8px;}
+.save-info{color:var(--text2);}
+.save-info b{color:var(--text);}
+.save-actions{display:flex;gap:8px;align-items:center;}
+.btn-exp{padding:5px 14px;background:var(--green);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
+.btn-imp{padding:5px 14px;background:var(--blue);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
+.btn-clr{padding:5px 14px;background:var(--red-bg);color:var(--red);border:1px solid var(--red);border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
+.btn-exp:hover,.btn-imp:hover,.btn-clr:hover{opacity:.85;}
 </style>
 </head>
 <body>
@@ -150,9 +160,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="header-right">
     <span class="badge-mes" id="badge-mes"></span>
     <button class="btn-hdr" onclick="window.print()">🖨️ Imprimir / PDF</button>
+    <button class="btn-hdr" onclick="exportData()">⬇️ Exportar dados</button>
+    <label class="btn-hdr" style="cursor:pointer">⬆️ Importar dados<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)"></label>
   </div>
 </div>
 
+<div class="save-bar">
+  <span class="save-info">💾 Dados salvos neste navegador · Última atualização: <b id="last-saved">nunca</b></span>
+  <span class="save-actions">
+    <button class="btn-exp" onclick="exportData()">⬇️ Exportar JSON</button>
+    <label class="btn-imp" style="cursor:pointer">⬆️ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+    <button class="btn-clr" onclick="clearData()">🗑️ Limpar dados</button>
+  </span>
+</div>
 <div class="summary-row">
   <div class="sum-card"><div class="sum-val" id="sum-krs" style="color:var(--blue)">14</div><div class="sum-lbl">Key Results totais</div></div>
   <div class="sum-card"><div class="sum-val" id="sum-ea" style="color:var(--amber)">0</div><div class="sum-lbl">Em andamento</div></div>
@@ -368,6 +388,7 @@ function updateKR(i){
   const sl=document.getElementById('stlbl-'+i);
   sl.textContent=st.txt; sl.className='kr-status '+st.cls;
   updateSummary(); updateCharts();
+  saveData();
 }
 
 function toggleHist(i){
@@ -386,12 +407,14 @@ function addHist(i){
   document.getElementById('ha-'+i).value='';
   document.getElementById('hp-'+i).value='';
   refreshHist(i);
+  saveData();
 }
 
 function delHist(i,ri){
   if(!confirm('Remover este registro?')) return;
   HIST[i].splice(ri,1);
   refreshHist(i);
+  saveData();
 }
 
 function refreshHist(i){
@@ -487,11 +510,88 @@ function switchTab(idx){
   document.querySelectorAll('.obj-section').forEach((s,i)=>s.classList.toggle('active',i===idx));
 }
 
+
+// ─── PERSISTÊNCIA DE DADOS ────────────────────────────────────
+const STORAGE_KEY = 'okr_barbara_2026';
+
+function saveData(){
+  const payload = {
+    savedAt: new Date().toISOString(),
+    version: 1,
+    krs: KRS.map(k => ({atual: k.atual, status: k.status})),
+    hist: HIST
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    const el = document.getElementById('last-saved');
+    if(el) el.textContent = new Date().toLocaleString('pt-BR');
+  } catch(e) { console.warn('Nao foi possivel salvar:', e); }
+}
+
+function loadData(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data.krs) data.krs.forEach((d,i)=>{ if(KRS[i]){ KRS[i].atual=d.atual; KRS[i].status=d.status; }});
+    if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
+    const el = document.getElementById('last-saved');
+    if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
+  } catch(e) { console.warn('Nao foi possivel carregar:', e); }
+}
+
+function exportData(){
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    version: 1,
+    krs: KRS.map(k => ({atual: k.atual, status: k.status})),
+    hist: HIST
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = 'okr-barbara-' + date + '.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event){
+  const file = (event.target.files||[])[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = JSON.parse(e.target.result);
+      if(data.krs) data.krs.forEach((d,i)=>{ if(KRS[i]){ KRS[i].atual=d.atual; KRS[i].status=d.status; }});
+      if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
+      saveData();
+      renderKRs();
+      updateSummary();
+      updateCharts();
+      const when = data.exportedAt ? ' | Exportado em: ' + new Date(data.exportedAt).toLocaleString('pt-BR') : '';
+      alert('Dados importados com sucesso!' + when);
+    } catch(err) { alert('Erro ao importar: arquivo invalido.'); }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function clearData(){
+  if(!confirm('Tem certeza que deseja limpar todos os dados salvos? Esta acao nao pode ser desfeita.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  KRS.forEach(k=>{ k.atual = (k.type==='num') ? null : 0; k.status='ni'; });
+  HIST.forEach((_,i)=>{ HIST[i]=[]; });
+  renderKRs(); updateSummary(); updateCharts();
+  const el = document.getElementById('last-saved');
+  if(el) el.textContent = 'nunca';
+}
+
 // INIT
 const now=new Date();
 const MN=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 document.getElementById('badge-mes').textContent=MN[now.getMonth()]+'/'+now.getFullYear();
 document.getElementById('foot-date').textContent=now.toLocaleDateString('pt-BR');
+loadData();
 renderKRs();
 buildCharts();
 </script>

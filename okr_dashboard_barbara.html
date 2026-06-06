@@ -143,6 +143,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .save-info{color:var(--text2);}
 .save-info b{color:var(--text);}
 .save-actions{display:flex;gap:8px;align-items:center;}
+.btn-link{padding:5px 14px;background:#6741d9;color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
 .btn-exp{padding:5px 14px;background:var(--green);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
 .btn-imp{padding:5px 14px;background:var(--blue);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
 .btn-clr{padding:5px 14px;background:var(--red-bg);color:var(--red);border:1px solid var(--red);border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
@@ -166,8 +167,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <div class="save-bar">
-  <span class="save-info">💾 Dados salvos neste navegador · Última atualização: <b id="last-saved">nunca</b></span>
+  <span class="save-info">💾 <span id="save-source">Dados salvos neste navegador</span> · Última atualização: <b id="last-saved">nunca</b></span>
   <span class="save-actions">
+    <button class="btn-link" onclick="copyLink()">🔗 Copiar link</button>
     <button class="btn-exp" onclick="exportData()">⬇️ Exportar JSON</button>
     <label class="btn-imp" style="cursor:pointer">⬆️ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
     <button class="btn-clr" onclick="clearData()">🗑️ Limpar dados</button>
@@ -514,6 +516,13 @@ function switchTab(idx){
 // ─── PERSISTÊNCIA DE DADOS ────────────────────────────────────
 const STORAGE_KEY = 'okr_barbara_2026';
 
+function _applyData(data){
+  if(data.krs) data.krs.forEach((d,i)=>{ if(KRS[i]){ KRS[i].atual=d.atual; KRS[i].status=d.status; }});
+  if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
+  const el = document.getElementById('last-saved');
+  if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
+}
+
 function saveData(){
   const payload = {
     savedAt: new Date().toISOString(),
@@ -521,23 +530,57 @@ function saveData(){
     krs: KRS.map(k => ({atual: k.atual, status: k.status})),
     hist: HIST
   };
+  const json = JSON.stringify(payload);
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    localStorage.setItem(STORAGE_KEY, json);
     const el = document.getElementById('last-saved');
     if(el) el.textContent = new Date().toLocaleString('pt-BR');
   } catch(e) { console.warn('Nao foi possivel salvar:', e); }
+  try {
+    const compressed = btoa(unescape(encodeURIComponent(json)));
+    history.replaceState(null, '', '#d=' + compressed);
+  } catch(e) { console.warn('Nao foi possivel atualizar URL:', e); }
 }
 
 function loadData(){
   try {
+    const hash = window.location.hash;
+    if(hash && hash.startsWith('#d=')) {
+      const compressed = hash.substring(3);
+      const json = decodeURIComponent(escape(atob(compressed)));
+      const data = JSON.parse(json);
+      _applyData(data);
+      const el = document.getElementById('save-source');
+      if(el) el.textContent = '🔗 Dados carregados do link compartilhado';
+      return;
+    }
+  } catch(e) { console.warn('Nao foi possivel carregar do hash:', e); }
+  try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw) return;
     const data = JSON.parse(raw);
-    if(data.krs) data.krs.forEach((d,i)=>{ if(KRS[i]){ KRS[i].atual=d.atual; KRS[i].status=d.status; }});
-    if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
-    const el = document.getElementById('last-saved');
-    if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
+    _applyData(data);
   } catch(e) { console.warn('Nao foi possivel carregar:', e); }
+}
+
+function copyLink(){
+  const payload = {
+    savedAt: new Date().toISOString(),
+    version: 1,
+    krs: KRS.map(k => ({atual: k.atual, status: k.status})),
+    hist: HIST
+  };
+  try {
+    const json = JSON.stringify(payload);
+    const compressed = btoa(unescape(encodeURIComponent(json)));
+    const url = window.location.origin + window.location.pathname + '#d=' + compressed;
+    history.replaceState(null, '', '#d=' + compressed);
+    navigator.clipboard.writeText(url).then(()=>{
+      alert('✅ Link copiado! Cole e envie para quem quiser compartilhar o progresso.');
+    }).catch(()=>{
+      prompt('Copie este link:', url);
+    });
+  } catch(e) { alert('Erro ao gerar link: ' + e.message); }
 }
 
 function exportData(){

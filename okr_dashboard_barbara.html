@@ -28,6 +28,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .badge-mes{background:rgba(255,255,255,0.15);color:#fff;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:600;}
 .btn-hdr{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;}
 .btn-hdr:hover{background:rgba(255,255,255,0.22);}
+.btn-hdr.active-pres{background:rgba(255,200,0,0.25);border-color:rgba(255,200,0,0.6);}
 
 /* SUMÁRIO */
 .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--gap);margin-bottom:var(--gap);}
@@ -67,6 +68,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .s-ea{background:var(--amber-bg);color:var(--amber);}
 .s-ok{background:var(--green-bg);color:var(--green);}
 .s-at{background:var(--red-bg);color:var(--red);}
+
+/* TENDÊNCIA */
+.kr-trend{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-left:6px;}
+.trend-ok{background:var(--green-bg);color:var(--green);}
+.trend-warn{background:var(--amber-bg);color:var(--amber);}
+.trend-bad{background:var(--red-bg);color:var(--red);}
 
 /* CONTROLES */
 .kr-controls{padding:10px 18px 14px;border-top:0.5px solid var(--border);background:#fafbfc;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -125,19 +132,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .c-blue{color:var(--blue);} .b-blue{background:var(--blue);}
 .c-amber{color:var(--amber);} .b-amber{background:var(--amber);}
 
-@media(max-width:640px){
-  .nova-entrada{grid-template-columns:1fr 1fr; }
-  .nova-entrada>div:first-child{grid-column:1/-1;}
-  .btn-add{grid-column:1/-1;}
-  .reg-cols{grid-template-columns:1fr;}
-  .reg-col:first-child{border-right:none;border-bottom:0.5px solid var(--border);}
-}
-@media print{
-  .btn-hdr,.tabs,.kr-controls,.nova-entrada,.btn-add,.reg-del{display:none!important;}
-  .obj-section{display:block!important;}
-  .hist-body{display:block!important;}
-}
-
 /* SAVE BAR */
 .save-bar{display:flex;align-items:center;justify-content:space-between;background:#fff;border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 16px;margin-bottom:var(--gap);font-size:12px;flex-wrap:wrap;gap:8px;}
 .save-info{color:var(--text2);}
@@ -147,7 +141,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-exp{padding:5px 14px;background:var(--green);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
 .btn-imp{padding:5px 14px;background:var(--blue);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
 .btn-clr{padding:5px 14px;background:var(--red-bg);color:var(--red);border:1px solid var(--red);border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;}
-.btn-exp:hover,.btn-imp:hover,.btn-clr:hover{opacity:.85;}
+.btn-exp:hover,.btn-imp:hover,.btn-clr:hover,.btn-link:hover{opacity:.85;}
+
+/* MODO APRESENTAÇÃO */
+body.apresentacao .kr-controls,
+body.apresentacao .kr-historico,
+body.apresentacao .save-bar,
+body.apresentacao .nova-entrada,
+body.apresentacao .btn-add,
+body.apresentacao .reg-del { display:none !important; }
+body.apresentacao .kr-card-top { padding-bottom:16px; }
+body.apresentacao .obj-section { display:block !important; }
+
+@media(max-width:640px){
+  .nova-entrada{grid-template-columns:1fr 1fr;}
+  .nova-entrada>div:first-child{grid-column:1/-1;}
+  .btn-add{grid-column:1/-1;}
+  .reg-cols{grid-template-columns:1fr;}
+  .reg-col:first-child{border-right:none;border-bottom:0.5px solid var(--border);}
+}
+@media print{
+  .btn-hdr,.tabs,.kr-controls,.nova-entrada,.btn-add,.reg-del,.save-bar{display:none!important;}
+  .obj-section{display:block!important;}
+  .hist-body{display:block!important;}
+}
 </style>
 </head>
 <body>
@@ -160,9 +177,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="header-right">
     <span class="badge-mes" id="badge-mes"></span>
+    <button class="btn-hdr" id="btn-pres" onclick="toggleApresentacao()">📊 Modo apresentação</button>
     <button class="btn-hdr" onclick="window.print()">🖨️ Imprimir / PDF</button>
-    <button class="btn-hdr" onclick="exportData()">⬇️ Exportar dados</button>
-    <label class="btn-hdr" style="cursor:pointer">⬆️ Importar dados<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)"></label>
   </div>
 </div>
 
@@ -175,6 +191,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="btn-clr" onclick="clearData()">🗑️ Limpar dados</button>
   </span>
 </div>
+
 <div class="summary-row">
   <div class="sum-card"><div class="sum-val" id="sum-krs" style="color:var(--blue)">14</div><div class="sum-lbl">Key Results totais</div></div>
   <div class="sum-card"><div class="sum-val" id="sum-ea" style="color:var(--amber)">0</div><div class="sum-lbl">Em andamento</div></div>
@@ -200,7 +217,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div id="krs-0"></div>
   <div class="traj-card">
     <h3>📉 Trajetória: Tempo médio de implementação (dias)</h3>
-    <div class="chart-wrap"><canvas id="ch-impl" role="img" aria-label="Trajetória de dias de implementação">Trajetória implementação.</canvas></div>
+    <div class="chart-wrap"><canvas id="ch-impl" role="img" aria-label="Trajetória de dias de implementação"></canvas></div>
   </div>
 </div>
 
@@ -215,8 +232,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div id="krs-1"></div>
   <div class="charts-row">
-    <div class="chart-card"><h3>📊 Satisfação no go live (0–10)</h3><div class="chart-wrap"><canvas id="ch-nps" role="img" aria-label="Satisfação go live">Satisfação go live.</canvas></div></div>
-    <div class="chart-card"><h3>✅ % Clientes aptos no go live</h3><div class="chart-wrap"><canvas id="ch-apto" role="img" aria-label="Clientes aptos">Clientes aptos.</canvas></div></div>
+    <div class="chart-card"><h3>📊 Satisfação no go live (0–10)</h3><div class="chart-wrap"><canvas id="ch-nps" role="img" aria-label="Satisfação go live"></canvas></div></div>
+    <div class="chart-card"><h3>✅ % Clientes aptos no go live</h3><div class="chart-wrap"><canvas id="ch-apto" role="img" aria-label="Clientes aptos"></canvas></div></div>
   </div>
 </div>
 
@@ -232,7 +249,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div id="krs-2"></div>
   <div class="traj-card">
     <h3>📈 Trajetória: Taxa de utilização de horas de consultoria (%)</h3>
-    <div class="chart-wrap"><canvas id="ch-cons" role="img" aria-label="Utilização consultoria">Utilização consultoria.</canvas></div>
+    <div class="chart-wrap"><canvas id="ch-cons" role="img" aria-label="Utilização consultoria"></canvas></div>
   </div>
 </div>
 
@@ -242,24 +259,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 // ─── DADOS KRs ────────────────────────────────────────────────
 const KRS = [
-  {obj:0,cor:'green',label:'Reduzir o tempo médio de implementação em 40% até dez/2026',formula:'(42 − atual) / 17 × 100',meta:'25 dias (−2,4 dias/mês a partir de jun)',type:'num',unit:'dias',atual:null,status:'ni'},
-  {obj:0,cor:'green',label:'Reduzir em 70% o retrabalho por inconsistências de base (migração → implementação)',formula:'Projetos que retornaram / Total de projetos',meta:'≤ 1 ocorrência',type:'num',unit:'ocorrências',atual:null,status:'ni'},
-  {obj:0,cor:'green',label:'Implantar checklist obrigatório de conferência da migração em 100% dos projetos',formula:'Checklist implementado',meta:'Sim (100%)',type:'bin',unit:'',atual:0,status:'ni'},
-  {obj:0,cor:'green',label:'Mapear e documentar 100% dos processos-chave da implementação',formula:'% processos documentados',meta:'100% até dez/2026',type:'pct',unit:'%',atual:0,status:'ni'},
-  {obj:1,cor:'blue',label:'Implantar mecanismo estruturado de avaliação de satisfação ao final da implementação',formula:'Número de pesquisas realizadas após go live',meta:'Implantado',type:'bin',unit:'',atual:0,status:'ni'},
-  {obj:1,cor:'blue',label:'Alcançar nota mínima 8/10 de satisfação dos clientes no go live',formula:'Soma das notas / Número de avaliações',meta:'≥ 8,0',type:'num',unit:'/10',atual:null,status:'ni'},
-  {obj:1,cor:'blue',label:'Implantar checklist de validação operacional de go live em 100% das implementações',formula:'Checklist implementado',meta:'Até jun/2026',type:'bin',unit:'',atual:0,status:'ni'},
-  {obj:1,cor:'blue',label:'Garantir que 80% dos clientes estejam aptos a executar rotinas essenciais no go live',formula:'Clientes aprovados no checklist / Total implementados',meta:'80%',type:'pct',unit:'%',atual:0,status:'ni'},
-  {obj:1,cor:'blue',label:'Reduzir para no máximo 10% os clientes que solicitam auxílio extra no pós go live',formula:'Clientes c/ auxílio extra / Total go live no período',meta:'≤ 10%',type:'pct',unit:'%',atual:null,status:'ni'},
-  {obj:2,cor:'amber',label:'Aumentar a taxa de utilização das horas mensais contratadas de consultoria',formula:'Horas executadas / Horas vendidas no período',meta:'80% (base: 47,9% · +4,6 p.p./mês)',type:'pct',unit:'%',atual:47.9,status:'ni'},
-  {obj:2,cor:'amber',label:'Garantir que 70% dos clientes usem ao menos 80% das horas contratadas',formula:'Clientes ≥ 75% uso / Total c/ consultoria ativa',meta:'70% dos clientes',type:'pct',unit:'%',atual:0,status:'ni'},
-  {obj:2,cor:'amber',label:'Reduzir em 30% os clientes com pacote que não usaram nenhuma hora no trimestre',formula:'Clientes 0h atual / Clientes 0h base',meta:'−30%',type:'pct',unit:'%',atual:null,status:'ni'},
-  {obj:2,cor:'amber',label:'Implantar mecanismo estruturado de avaliação de satisfação nos atendimentos de consultoria',formula:'Número de avaliações realizadas no mês',meta:'Implantado',type:'bin',unit:'',atual:0,status:'ni'},
-  {obj:2,cor:'amber',label:'Alcançar nota média mínima 8/10 nas avaliações de consultoria',formula:'Soma das notas / Número de avaliações',meta:'≥ 8,0',type:'num',unit:'/10',atual:null,status:'ni'}
+  {obj:0,cor:'green',label:'Reduzir o tempo médio de implementação em 40% até dez/2026',meta:'25 dias (−2,4 dias/mês a partir de jun)',type:'num',unit:'dias',atual:null,status:'ni'},
+  {obj:0,cor:'green',label:'Reduzir em 70% o retrabalho por inconsistências de base (migração → implementação)',meta:'≤ 1 ocorrência',type:'num',unit:'ocorrências',atual:null,status:'ni'},
+  {obj:0,cor:'green',label:'Implantar checklist obrigatório de conferência da migração em 100% dos projetos',meta:'Sim (100%)',type:'bin',unit:'',atual:0,status:'ni'},
+  {obj:0,cor:'green',label:'Mapear e documentar 100% dos processos-chave da implementação',meta:'100% até dez/2026',type:'pct',unit:'%',atual:0,status:'ni'},
+  {obj:1,cor:'blue',label:'Implantar mecanismo estruturado de avaliação de satisfação ao final da implementação',meta:'Implantado',type:'bin',unit:'',atual:0,status:'ni'},
+  {obj:1,cor:'blue',label:'Alcançar nota mínima 8/10 de satisfação dos clientes no go live',meta:'≥ 8,0',type:'num',unit:'/10',atual:null,status:'ni'},
+  {obj:1,cor:'blue',label:'Implantar checklist de validação operacional de go live em 100% das implementações',meta:'Até jun/2026',type:'bin',unit:'',atual:0,status:'ni'},
+  {obj:1,cor:'blue',label:'Garantir que 80% dos clientes estejam aptos a executar rotinas essenciais no go live',meta:'80%',type:'pct',unit:'%',atual:0,status:'ni'},
+  {obj:1,cor:'blue',label:'Reduzir para no máximo 10% os clientes que solicitam auxílio extra no pós go live',meta:'≤ 10%',type:'pct',unit:'%',atual:null,status:'ni'},
+  {obj:2,cor:'amber',label:'Aumentar a taxa de utilização das horas mensais contratadas de consultoria',meta:'80% (base: 47,9% · +4,6 p.p./mês)',type:'pct',unit:'%',atual:47.9,status:'ni'},
+  {obj:2,cor:'amber',label:'Garantir que 70% dos clientes usem ao menos 80% das horas contratadas',meta:'70% dos clientes',type:'pct',unit:'%',atual:0,status:'ni'},
+  {obj:2,cor:'amber',label:'Reduzir em 30% os clientes com pacote que não usaram nenhuma hora no trimestre',meta:'−30%',type:'pct',unit:'%',atual:null,status:'ni'},
+  {obj:2,cor:'amber',label:'Implantar mecanismo estruturado de avaliação de satisfação nos atendimentos de consultoria',meta:'Implantado',type:'bin',unit:'',atual:0,status:'ni'},
+  {obj:2,cor:'amber',label:'Alcançar nota média mínima 8/10 nas avaliações de consultoria',meta:'≥ 8,0',type:'num',unit:'/10',atual:null,status:'ni'}
 ];
 
-// histórico semanal: array de {semana, acoes, proximos}
+// histórico semanal por KR
 const HIST = KRS.map(()=>[]);
+
+// histórico de valores mensais por KR: {'Jun/2026': val, ...}
+const MONTHLY_VALS = KRS.map(()=>({}));
 
 const ST = {
   ni:{cls:'s-ni',txt:'Não iniciado'},
@@ -267,6 +287,14 @@ const ST = {
   ok:{cls:'s-ok',txt:'Concluído'},
   at:{cls:'s-at',txt:'Atrasado'}
 };
+
+const MESES = ['Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const DIAS_ALVO = [39.6,37.2,34.8,32.4,30,27.6,25.2];
+const CONS_ALVO = [52.5,57.1,61.7,66.3,70.9,75.5,80.0];
+
+const now = new Date();
+const MN = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const mesAtualIdx = Math.max(0, Math.min(6, now.getMonth() - 5)); // 0=Jun … 6=Dez
 
 function calcPct(kr){
   if(kr.type==='bin') return kr.atual*100;
@@ -283,23 +311,34 @@ function calcPct(kr){
   return 0;
 }
 
+// Indicador de tendência: % atual vs % esperado para o mês corrente
+function calcTrend(kr){
+  if(kr.status==='ni' || kr.atual===null) return null;
+  if(kr.status==='ok') return {cls:'trend-ok', txt:'✓ Concluído'};
+  const pctAtual = calcPct(kr);
+  const pctEsperado = Math.round(((mesAtualIdx + 1) / 7) * 100);
+  const diff = pctAtual - pctEsperado;
+  if(diff >= 10)  return {cls:'trend-ok',  txt:'▲ Adiantado'};
+  if(diff >= -10) return {cls:'trend-warn', txt:'→ No prazo'};
+  return {cls:'trend-bad', txt:'▼ Atrasado'};
+}
+
 function semanaAtual(){
-  const d=new Date();
-  const start=new Date(d.getFullYear(),0,1);
-  const wk=Math.ceil(((d-start)/86400000+start.getDay()+1)/7);
-  const m=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  return `Semana ${wk} · ${d.getDate()}/${m[d.getMonth()]}/${d.getFullYear()}`;
+  const start = new Date(now.getFullYear(),0,1);
+  const wk = Math.ceil(((now-start)/86400000+start.getDay()+1)/7);
+  return `Semana ${wk} · ${now.getDate()}/${MN[now.getMonth()]}/${now.getFullYear()}`;
 }
 
 function renderKRs(){
   [0,1,2].forEach(obj=>{
-    const el=document.getElementById('krs-'+obj);
-    el.innerHTML='';
+    const el = document.getElementById('krs-'+obj);
+    el.innerHTML = '';
     KRS.forEach((kr,i)=>{
       if(kr.obj!==obj) return;
-      const pct=calcPct(kr);
-      const st=ST[kr.status];
-      let ctrl='';
+      const pct = calcPct(kr);
+      const st = ST[kr.status];
+      const trend = calcTrend(kr);
+      let ctrl = '';
       if(kr.type==='bin'){
         ctrl=`<label>Realizado?</label>
         <select class="ki ki-st" id="inp-${i}">
@@ -310,7 +349,7 @@ function renderKRs(){
         ctrl=`<label>Valor atual ${kr.unit}:</label>
         <input class="ki ki-num" id="inp-${i}" type="number" step="0.1" min="0" value="${kr.atual!==null?kr.atual:''}" placeholder="—">`;
       }
-      const histItems=HIST[i].map((r,ri)=>`
+      const histItems = HIST[i].map((r,ri)=>`
         <div class="reg-item">
           <div class="reg-header">
             <span class="reg-semana">${r.semana}</span>
@@ -322,6 +361,10 @@ function renderKRs(){
           </div>
         </div>`).join('');
 
+      const trendHtml = trend
+        ? `<span class="kr-trend ${trend.cls}" id="trend-${i}">${trend.txt}</span>`
+        : `<span id="trend-${i}"></span>`;
+
       el.innerHTML+=`
       <div class="kr-card" id="krc-${i}">
         <div class="kr-card-top">
@@ -332,7 +375,10 @@ function renderKRs(){
           <div class="kr-bar-wrap"><div class="kr-bar b-${kr.cor}" id="bar-${i}" style="width:${pct}%"></div></div>
           <div class="kr-meta-row">
             <span>Meta: <b>${kr.meta}</b></span>
-            <span class="kr-status ${st.cls}" id="stlbl-${i}">${st.txt}</span>
+            <span style="display:flex;align-items:center;gap:4px;">
+              <span class="kr-status ${st.cls}" id="stlbl-${i}">${st.txt}</span>
+              ${trendHtml}
+            </span>
           </div>
         </div>
         <div class="kr-controls">
@@ -378,36 +424,53 @@ function renderKRs(){
 }
 
 function updateKR(i){
-  const kr=KRS[i];
-  const inp=document.getElementById('inp-'+i);
-  kr.status=document.getElementById('st-'+i).value;
-  if(kr.type==='bin') kr.atual=parseInt(inp.value);
-  else { const v=parseFloat(inp.value); kr.atual=isNaN(v)?null:v; }
-  const pct=calcPct(kr);
-  document.getElementById('bar-'+i).style.width=pct+'%';
-  document.getElementById('pct-'+i).textContent=pct+'%';
-  const st=ST[kr.status];
-  const sl=document.getElementById('stlbl-'+i);
-  sl.textContent=st.txt; sl.className='kr-status '+st.cls;
-  updateSummary(); updateCharts();
+  const kr = KRS[i];
+  const inp = document.getElementById('inp-'+i);
+  kr.status = document.getElementById('st-'+i).value;
+  if(kr.type==='bin') kr.atual = parseInt(inp.value);
+  else { const v = parseFloat(inp.value); kr.atual = isNaN(v) ? null : v; }
+
+  // registrar no histórico mensal para plotar nos gráficos
+  if(kr.atual !== null && kr.type !== 'bin'){
+    const key = `${MN[now.getMonth()]}/${now.getFullYear()}`;
+    MONTHLY_VALS[i][key] = kr.atual;
+  }
+
+  const pct = calcPct(kr);
+  document.getElementById('bar-'+i).style.width = pct+'%';
+  document.getElementById('pct-'+i).textContent = pct+'%';
+  const st = ST[kr.status];
+  const sl = document.getElementById('stlbl-'+i);
+  sl.textContent = st.txt; sl.className = 'kr-status '+st.cls;
+
+  // atualizar badge de tendência
+  const trend = calcTrend(kr);
+  const trendEl = document.getElementById('trend-'+i);
+  if(trendEl){
+    if(trend){ trendEl.textContent = trend.txt; trendEl.className = 'kr-trend '+trend.cls; }
+    else { trendEl.textContent = ''; trendEl.className = ''; }
+  }
+
+  updateSummary();
+  updateCharts();
   saveData();
 }
 
 function toggleHist(i){
-  const body=document.getElementById('hbody-'+i);
-  const tog=document.getElementById('htog-'+i);
-  const open=body.classList.toggle('open');
-  tog.textContent=open?'▲ Recolher':'▼ Ver / adicionar';
+  const body = document.getElementById('hbody-'+i);
+  const tog = document.getElementById('htog-'+i);
+  const open = body.classList.toggle('open');
+  tog.textContent = open ? '▲ Recolher' : '▼ Ver / adicionar';
 }
 
 function addHist(i){
-  const semana=document.getElementById('hw-'+i).value.trim();
-  const acoes=document.getElementById('ha-'+i).value.trim();
-  const proximos=document.getElementById('hp-'+i).value.trim();
+  const semana = document.getElementById('hw-'+i).value.trim();
+  const acoes = document.getElementById('ha-'+i).value.trim();
+  const proximos = document.getElementById('hp-'+i).value.trim();
   if(!acoes && !proximos){ alert('Preencha ao menos um campo antes de adicionar.'); return; }
   HIST[i].unshift({semana:semana||semanaAtual(), acoes, proximos});
-  document.getElementById('ha-'+i).value='';
-  document.getElementById('hp-'+i).value='';
+  document.getElementById('ha-'+i).value = '';
+  document.getElementById('hp-'+i).value = '';
   refreshHist(i);
   saveData();
 }
@@ -420,11 +483,11 @@ function delHist(i,ri){
 }
 
 function refreshHist(i){
-  const reg=document.getElementById('hreg-'+i);
-  const cnt=document.getElementById('hcount-'+i);
-  cnt.textContent=HIST[i].length>0?'('+HIST[i].length+' registro'+(HIST[i].length>1?'s':'')+')':'';
+  const reg = document.getElementById('hreg-'+i);
+  const cnt = document.getElementById('hcount-'+i);
+  cnt.textContent = HIST[i].length>0 ? '('+HIST[i].length+' registro'+(HIST[i].length>1?'s':'')+')' : '';
   if(!HIST[i].length){ reg.innerHTML='<div class="empty-hist">Nenhum registro ainda. Adicione o primeiro acima!</div>'; return; }
-  reg.innerHTML=HIST[i].map((r,ri)=>`
+  reg.innerHTML = HIST[i].map((r,ri)=>`
     <div class="reg-item">
       <div class="reg-header">
         <span class="reg-semana">${r.semana}</span>
@@ -438,23 +501,28 @@ function refreshHist(i){
 }
 
 function updateSummary(){
-  const ea=KRS.filter(k=>k.status==='ea').length;
-  const ok=KRS.filter(k=>k.status==='ok').length;
-  const avg=Math.round(KRS.reduce((s,k)=>s+calcPct(k),0)/KRS.length);
-  document.getElementById('sum-ea').textContent=ea;
-  document.getElementById('sum-ok').textContent=ok;
-  document.getElementById('sum-avg').textContent=avg+'%';
+  const ea = KRS.filter(k=>k.status==='ea').length;
+  const ok = KRS.filter(k=>k.status==='ok').length;
+  const avg = Math.round(KRS.reduce((s,k)=>s+calcPct(k),0)/KRS.length);
+  document.getElementById('sum-ea').textContent = ea;
+  document.getElementById('sum-ok').textContent = ok;
+  document.getElementById('sum-avg').textContent = avg+'%';
+}
+
+// ─── MODO APRESENTAÇÃO ────────────────────────────────────────
+function toggleApresentacao(){
+  const on = document.body.classList.toggle('apresentacao');
+  const btn = document.getElementById('btn-pres');
+  btn.textContent = on ? '✏️ Modo edição' : '📊 Modo apresentação';
+  btn.classList.toggle('active-pres', on);
 }
 
 // ─── GRÁFICOS ────────────────────────────────────────────────
-const MESES=['Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const DIAS_ALVO=[39.6,37.2,34.8,32.4,30,27.6,25.2];
-const CONS_ALVO=[52.5,57.1,61.7,66.3,70.9,75.5,80.0];
-let charts={};
+let charts = {};
 
 function buildCharts(){
-  const baseOpts=(yLabel,min,max,cb)=>({
-    responsive:true,maintainAspectRatio:false,
+  const baseOpts = (yLabel,min,max,cb) => ({
+    responsive:true, maintainAspectRatio:false,
     scales:{
       y:{min,max,ticks:{font:{size:11},callback:cb||undefined},title:{display:!!yLabel,text:yLabel,font:{size:11}}},
       x:{ticks:{font:{size:11},autoSkip:false}}
@@ -462,49 +530,63 @@ function buildCharts(){
     plugins:{legend:{labels:{font:{size:11},boxWidth:12}}}
   });
 
-  charts.impl=new Chart(document.getElementById('ch-impl'),{
+  charts.impl = new Chart(document.getElementById('ch-impl'),{
     type:'line',
     data:{labels:MESES,datasets:[
       {label:'Alvo (dias)',data:DIAS_ALVO,borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,0.07)',borderWidth:2,pointRadius:4,tension:.3,fill:true},
-      {label:'Realizado',data:[null,null,null,null,null,null,null],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.07)',borderWidth:2,pointRadius:4,tension:.3,borderDash:[5,4]}
+      {label:'Realizado',data:Array(7).fill(null),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.07)',borderWidth:2,pointRadius:4,tension:.3,borderDash:[5,4]}
     ]},
     options:baseOpts('dias',20,45)
   });
 
-  charts.nps=new Chart(document.getElementById('ch-nps'),{
+  charts.nps = new Chart(document.getElementById('ch-nps'),{
     type:'bar',
     data:{labels:MESES,datasets:[
-      {label:'Nota média',data:[null,null,null,null,null,null,null],backgroundColor:'rgba(24,95,165,0.7)',borderRadius:4},
-      {label:'Meta (8,0)',data:[8,8,8,8,8,8,8],type:'line',borderColor:'#A32D2D',borderWidth:2,pointRadius:0,borderDash:[5,4],fill:false}
+      {label:'Nota média',data:Array(7).fill(null),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:4},
+      {label:'Meta (8,0)',data:Array(7).fill(8),type:'line',borderColor:'#A32D2D',borderWidth:2,pointRadius:0,borderDash:[5,4],fill:false}
     ]},
     options:baseOpts('',0,10)
   });
 
-  charts.apto=new Chart(document.getElementById('ch-apto'),{
+  charts.apto = new Chart(document.getElementById('ch-apto'),{
     type:'bar',
     data:{labels:MESES,datasets:[
-      {label:'% Aptos',data:[null,null,null,null,null,null,null],backgroundColor:'rgba(24,95,165,0.7)',borderRadius:4},
-      {label:'Meta (80%)',data:[80,80,80,80,80,80,80],type:'line',borderColor:'#A32D2D',borderWidth:2,pointRadius:0,borderDash:[5,4],fill:false}
+      {label:'% Aptos',data:Array(7).fill(null),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:4},
+      {label:'Meta (80%)',data:Array(7).fill(80),type:'line',borderColor:'#A32D2D',borderWidth:2,pointRadius:0,borderDash:[5,4],fill:false}
     ]},
     options:baseOpts('',0,100,v=>v+'%')
   });
 
-  charts.cons=new Chart(document.getElementById('ch-cons'),{
+  charts.cons = new Chart(document.getElementById('ch-cons'),{
     type:'line',
     data:{labels:MESES,datasets:[
       {label:'Alvo (%)',data:CONS_ALVO,borderColor:'#854F0B',backgroundColor:'rgba(133,79,11,0.07)',borderWidth:2,pointRadius:4,tension:.3,fill:true},
-      {label:'Realizado',data:[null,null,null,null,null,null,null],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.07)',borderWidth:2,pointRadius:4,tension:.3,borderDash:[5,4]}
+      {label:'Realizado',data:Array(7).fill(null),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.07)',borderWidth:2,pointRadius:4,tension:.3,borderDash:[5,4]}
     ]},
     options:baseOpts('%',40,85,v=>v+'%')
+  });
+
+  updateCharts();
+}
+
+// Série histórica de 7 meses a partir de MONTHLY_VALS
+function buildSeries(krIdx){
+  return MESES.map(m=>{
+    const v = MONTHLY_VALS[krIdx][`${m}/2026`];
+    return (v !== undefined && v !== null) ? v : null;
   });
 }
 
 function updateCharts(){
-  const now=new Date(); const mi=Math.max(0,Math.min(6,now.getMonth()-5));
-  const krDias=KRS.find(k=>k.unit==='dias');
-  if(krDias&&krDias.atual!==null){charts.impl.data.datasets[1].data[mi]=krDias.atual;charts.impl.update();}
-  const krCons=KRS.find(k=>k.label.includes('taxa de utilização'));
-  if(krCons&&krCons.atual!==null){charts.cons.data.datasets[1].data[mi]=krCons.atual;charts.cons.update();}
+  if(!charts.impl) return;
+  charts.impl.data.datasets[1].data = buildSeries(0);  // KR0: dias implementação
+  charts.impl.update();
+  charts.nps.data.datasets[0].data  = buildSeries(5);  // KR5: nota go live
+  charts.nps.update();
+  charts.apto.data.datasets[0].data = buildSeries(7);  // KR7: % clientes aptos
+  charts.apto.update();
+  charts.cons.data.datasets[1].data = buildSeries(9);  // KR9: % utilização consultoria
+  charts.cons.update();
 }
 
 function switchTab(idx){
@@ -512,89 +594,75 @@ function switchTab(idx){
   document.querySelectorAll('.obj-section').forEach((s,i)=>s.classList.toggle('active',i===idx));
 }
 
-
-// ─── PERSISTÊNCIA DE DADOS ────────────────────────────────────
+// ─── PERSISTÊNCIA ────────────────────────────────────────────
 const STORAGE_KEY = 'okr_barbara_2026';
 
 function _applyData(data){
   if(data.krs) data.krs.forEach((d,i)=>{ if(KRS[i]){ KRS[i].atual=d.atual; KRS[i].status=d.status; }});
   if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
+  if(data.monthlyVals) data.monthlyVals.forEach((mv,i)=>{ if(MONTHLY_VALS[i] && mv) Object.assign(MONTHLY_VALS[i], mv); });
   const el = document.getElementById('last-saved');
   if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
 }
 
-function saveData(){
-  const payload = {
+function _buildPayload(extra){
+  return Object.assign({
     savedAt: new Date().toISOString(),
-    version: 1,
-    krs: KRS.map(k => ({atual: k.atual, status: k.status})),
-    hist: HIST
-  };
+    version: 2,
+    krs: KRS.map(k=>({atual:k.atual, status:k.status})),
+    hist: HIST,
+    monthlyVals: MONTHLY_VALS
+  }, extra||{});
+}
+
+function saveData(){
+  const payload = _buildPayload();
   const json = JSON.stringify(payload);
   try {
     localStorage.setItem(STORAGE_KEY, json);
     const el = document.getElementById('last-saved');
     if(el) el.textContent = new Date().toLocaleString('pt-BR');
-  } catch(e) { console.warn('Nao foi possivel salvar:', e); }
+  } catch(e){ console.warn('Não foi possível salvar:', e); }
   try {
     const compressed = btoa(unescape(encodeURIComponent(json)));
-    history.replaceState(null, '', '#d=' + compressed);
-  } catch(e) { console.warn('Nao foi possivel atualizar URL:', e); }
+    history.replaceState(null,'','#d='+compressed);
+  } catch(e){ /* ignora se URL ficar grande demais */ }
 }
 
 function loadData(){
   try {
     const hash = window.location.hash;
-    if(hash && hash.startsWith('#d=')) {
-      const compressed = hash.substring(3);
-      const json = decodeURIComponent(escape(atob(compressed)));
-      const data = JSON.parse(json);
-      _applyData(data);
+    if(hash && hash.startsWith('#d=')){
+      const json = decodeURIComponent(escape(atob(hash.substring(3))));
+      _applyData(JSON.parse(json));
       const el = document.getElementById('save-source');
       if(el) el.textContent = '🔗 Dados carregados do link compartilhado';
       return;
     }
-  } catch(e) { console.warn('Nao foi possivel carregar do hash:', e); }
+  } catch(e){ console.warn('Não foi possível carregar do hash:', e); }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    _applyData(data);
-  } catch(e) { console.warn('Nao foi possivel carregar:', e); }
+    if(raw) _applyData(JSON.parse(raw));
+  } catch(e){ console.warn('Não foi possível carregar:', e); }
 }
 
 function copyLink(){
-  const payload = {
-    savedAt: new Date().toISOString(),
-    version: 1,
-    krs: KRS.map(k => ({atual: k.atual, status: k.status})),
-    hist: HIST
-  };
   try {
-    const json = JSON.stringify(payload);
+    const json = JSON.stringify(_buildPayload());
     const compressed = btoa(unescape(encodeURIComponent(json)));
     const url = window.location.origin + window.location.pathname + '#d=' + compressed;
-    history.replaceState(null, '', '#d=' + compressed);
-    navigator.clipboard.writeText(url).then(()=>{
-      alert('✅ Link copiado! Cole e envie para quem quiser compartilhar o progresso.');
-    }).catch(()=>{
-      prompt('Copie este link:', url);
-    });
-  } catch(e) { alert('Erro ao gerar link: ' + e.message); }
+    history.replaceState(null,'','#d='+compressed);
+    navigator.clipboard.writeText(url)
+      .then(()=>alert('✅ Link copiado! Cole e envie para quem quiser compartilhar o progresso.'))
+      .catch(()=>prompt('Copie este link:', url));
+  } catch(e){ alert('Erro ao gerar link: '+e.message); }
 }
 
 function exportData(){
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    version: 1,
-    krs: KRS.map(k => ({atual: k.atual, status: k.status})),
-    hist: HIST
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const blob = new Blob([JSON.stringify(_buildPayload({exportedAt:new Date().toISOString()}), null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const date = new Date().toISOString().slice(0,10);
-  a.href = url; a.download = 'okr-barbara-' + date + '.json'; a.click();
+  a.href = url; a.download = 'okr-barbara-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -605,35 +673,33 @@ function importData(event){
   reader.onload = function(e){
     try {
       const data = JSON.parse(e.target.result);
-      if(data.krs) data.krs.forEach((d,i)=>{ if(KRS[i]){ KRS[i].atual=d.atual; KRS[i].status=d.status; }});
-      if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
+      _applyData(data);
       saveData();
       renderKRs();
-      updateSummary();
       updateCharts();
-      const when = data.exportedAt ? ' | Exportado em: ' + new Date(data.exportedAt).toLocaleString('pt-BR') : '';
-      alert('Dados importados com sucesso!' + when);
-    } catch(err) { alert('Erro ao importar: arquivo invalido.'); }
+      const when = data.exportedAt ? ' | Exportado em: '+new Date(data.exportedAt).toLocaleString('pt-BR') : '';
+      alert('Dados importados com sucesso!'+when);
+    } catch(err){ alert('Erro ao importar: arquivo inválido.'); }
     event.target.value = '';
   };
   reader.readAsText(file);
 }
 
 function clearData(){
-  if(!confirm('Tem certeza que deseja limpar todos os dados salvos? Esta acao nao pode ser desfeita.')) return;
+  if(!confirm('Tem certeza que deseja limpar todos os dados salvos? Esta ação não pode ser desfeita.')) return;
   localStorage.removeItem(STORAGE_KEY);
-  KRS.forEach(k=>{ k.atual = (k.type==='num') ? null : 0; k.status='ni'; });
+  KRS.forEach(k=>{ k.atual=(k.type==='num')?null:0; k.status='ni'; });
   HIST.forEach((_,i)=>{ HIST[i]=[]; });
-  renderKRs(); updateSummary(); updateCharts();
+  MONTHLY_VALS.forEach(mv=>{ Object.keys(mv).forEach(k=>delete mv[k]); });
+  renderKRs(); updateCharts();
   const el = document.getElementById('last-saved');
   if(el) el.textContent = 'nunca';
+  history.replaceState(null,'',window.location.pathname);
 }
 
-// INIT
-const now=new Date();
-const MN=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-document.getElementById('badge-mes').textContent=MN[now.getMonth()]+'/'+now.getFullYear();
-document.getElementById('foot-date').textContent=now.toLocaleDateString('pt-BR');
+// ─── INIT ────────────────────────────────────────────────────
+document.getElementById('badge-mes').textContent = MN[now.getMonth()]+'/'+now.getFullYear();
+document.getElementById('foot-date').textContent = now.toLocaleDateString('pt-BR');
 loadData();
 renderKRs();
 buildCharts();

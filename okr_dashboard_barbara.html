@@ -156,6 +156,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-clr{padding:5px 13px;background:var(--red-bg);color:var(--red);border:1px solid #f5c6c6;border-radius:20px;font-size:12px;cursor:pointer;font-weight:700;}
 .btn-exp:hover,.btn-imp:hover,.btn-clr:hover,.btn-link:hover{opacity:.85;}
 
+/* ANOTAÇÕES MENSAIS */
+.notes-panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);margin-bottom:var(--gap);}
+.notes-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;cursor:pointer;user-select:none;}
+.notes-header:hover{background:#f8f9fb;border-radius:var(--radius);}
+.notes-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.notes-body{padding:0 16px 14px;display:none;}
+.notes-body.open{display:block;}
+.notes-mes-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.notes-mes-row label{font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;}
+.ki-mes-global{padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:#fff;color:var(--text);}
+.notes-ta{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:var(--text);resize:vertical;min-height:70px;line-height:1.6;transition:border-color .15s;}
+.notes-ta:focus{outline:none;border-color:#6889cc;box-shadow:0 0 0 3px rgba(104,137,204,0.12);}
+.notes-saved{font-size:11px;color:var(--green);margin-left:8px;display:none;}
+
 /* MODO APRESENTAÇÃO */
 body.apresentacao .kr-controls,
 body.apresentacao .kr-historico,
@@ -207,6 +221,24 @@ body.apresentacao .obj-section { display:block !important; }
     <label class="btn-imp" style="cursor:pointer">⬆️ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
     <button class="btn-clr" onclick="clearData()">🗑️ Limpar dados</button>
   </span>
+</div>
+
+<!-- ANOTAÇÕES MENSAIS -->
+<div class="notes-panel" id="notes-panel">
+  <div class="notes-header" onclick="toggleNotes()">
+    <span class="notes-title">📝 Anotações do mês <span id="notes-count"></span></span>
+    <span class="hist-toggle" id="notes-tog">▼ Contexto para reuniões 1:1</span>
+  </div>
+  <div class="notes-body" id="notes-body">
+    <div class="notes-mes-row">
+      <label>Mês:</label>
+      <select class="ki-mes-global" id="notes-mes" onchange="loadNotesMes()">
+        <!-- preenchido por JS -->
+      </select>
+      <span class="notes-saved" id="notes-saved">✓ Salvo</span>
+    </div>
+    <textarea class="notes-ta" id="notes-ta" placeholder="Ex: Fechamos 3 projetos em julho, equipe em férias na 3ª semana, baseline de implementação subiu por novo cliente grande..." oninput="saveNote()"></textarea>
+  </div>
 </div>
 
 <div class="summary-row">
@@ -268,6 +300,9 @@ body.apresentacao .obj-section { display:block !important; }
     <h3>📈 Trajetória: Taxa de utilização de horas de consultoria (%)</h3>
     <div class="chart-wrap"><canvas id="ch-cons" role="img" aria-label="Utilização consultoria"></canvas></div>
   </div>
+  <div class="charts-row">
+    <div class="chart-card"><h3>⭐ Nota média nos atendimentos de consultoria (0–10)</h3><div class="chart-wrap"><canvas id="ch-nota-cons" role="img" aria-label="Nota consultoria"></canvas></div></div>
+  </div>
 </div>
 
 <div class="footer">Preâmbulo Tech · CPJ-3C · Atualizado em <span id="foot-date"></span></div>
@@ -298,6 +333,9 @@ const HIST = KRS.map(()=>[]);
 // histórico de valores mensais por KR: {'Jun/2026': val, ...}
 const MONTHLY_VALS = KRS.map(()=>({}));
 
+// anotações de contexto mensais: {'Jun/2026': 'texto...'}
+const MONTHLY_NOTES = {};
+
 const ST = {
   ni:{cls:'s-ni',txt:'Não iniciado'},
   ea:{cls:'s-ea',txt:'Em andamento'},
@@ -305,13 +343,24 @@ const ST = {
   at:{cls:'s-at',txt:'Atrasado'}
 };
 
-const MESES = ['Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const DIAS_ALVO = [39.6,37.2,34.8,32.4,30,27.6,25.2];
 const CONS_ALVO = [52.5,57.1,61.7,66.3,70.9,75.5,80.0];
 
-const now = new Date();
 const MN = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const mesAtualIdx = Math.max(0, Math.min(6, now.getMonth() - 5)); // 0=Jun … 6=Dez
+const OKR_START_MONTH = 5;  // junho (0-indexed)
+const OKR_MONTHS = 7;       // jun → dez
+const MESES = MN.slice(OKR_START_MONTH, OKR_START_MONTH + OKR_MONTHS);
+
+const now = new Date();
+const mesAtualIdx = Math.max(0, Math.min(OKR_MONTHS - 1, now.getMonth() - OKR_START_MONTH));
+
+// Índices fixos dos KRs plotados nos gráficos
+const KR_IDX_IMPL      = 0;  // dias de implementação
+const KR_IDX_NPS       = 5;  // nota go live
+const KR_IDX_APTO      = 7;  // % clientes aptos
+const KR_IDX_CONS      = 9;  // % utilização consultoria
+const KR_IDX_NOTA_CONS = 13; // nota média consultoria
+const KR_CHART_IDXS = new Set([KR_IDX_IMPL, KR_IDX_NPS, KR_IDX_APTO, KR_IDX_CONS, KR_IDX_NOTA_CONS]);
 
 function calcPct(kr){
   if(kr.type==='bin') return kr.atual*100;
@@ -341,9 +390,26 @@ function calcTrend(kr){
 }
 
 function semanaAtual(){
-  const start = new Date(now.getFullYear(),0,1);
-  const wk = Math.ceil(((now-start)/86400000+start.getDay()+1)/7);
-  return `Semana ${wk} · ${now.getDate()}/${MN[now.getMonth()]}/${now.getFullYear()}`;
+  const d = new Date();  // sempre avaliado no momento da chamada
+  const start = new Date(d.getFullYear(),0,1);
+  const wk = Math.ceil(((d-start)/86400000+start.getDay()+1)/7);
+  return `Semana ${wk} · ${d.getDate()}/${MN[d.getMonth()]}/${d.getFullYear()}`;
+}
+
+// Helper compartilhado — gera HTML dos itens do histórico de um KR
+function renderHistItems(i){
+  if(!HIST[i].length) return '<div class="empty-hist">Nenhum registro ainda. Adicione o primeiro acima!</div>';
+  return HIST[i].map((r,ri)=>`
+    <div class="reg-item">
+      <div class="reg-header">
+        <span class="reg-semana">${r.semana}</span>
+        <button class="reg-del" onclick="delHist(${i},${ri})" title="Remover">✕</button>
+      </div>
+      <div class="reg-cols">
+        <div class="reg-col"><div class="reg-col-title">🚀 O que fiz</div><div class="reg-col-text">${r.acoes||'—'}</div></div>
+        <div class="reg-col"><div class="reg-col-title">➡️ Próximos passos</div><div class="reg-col-text">${r.proximos||'—'}</div></div>
+      </div>
+    </div>`).join('');
 }
 
 function renderKRs(){
@@ -356,6 +422,7 @@ function renderKRs(){
       const st = ST[kr.status];
       const trend = calcTrend(kr);
       let ctrl = '';
+      const mesOpts = MESES.map(m=>`<option value="${m}/2026"${m===MESES[mesAtualIdx]?' selected':''}>${m}</option>`).join('');
       if(kr.type==='bin'){
         ctrl=`<label>Realizado?</label>
         <select class="ki ki-st" id="inp-${i}">
@@ -364,19 +431,11 @@ function renderKRs(){
         </select>`;
       } else {
         ctrl=`<label>Valor atual ${kr.unit}:</label>
-        <input class="ki ki-num" id="inp-${i}" type="number" step="0.1" min="0" value="${kr.atual!==null?kr.atual:''}" placeholder="—">`;
+        <input class="ki ki-num" id="inp-${i}" type="number" step="0.1" min="0" value="${kr.atual!==null?kr.atual:''}" placeholder="—">
+        <label>Mês ref.:</label>
+        <select class="ki" id="mes-${i}" style="width:80px">${mesOpts}</select>`;
       }
-      const histItems = HIST[i].map((r,ri)=>`
-        <div class="reg-item">
-          <div class="reg-header">
-            <span class="reg-semana">${r.semana}</span>
-            <button class="reg-del" onclick="delHist(${i},${ri})" title="Remover">✕</button>
-          </div>
-          <div class="reg-cols">
-            <div class="reg-col"><div class="reg-col-title">🚀 O que fiz</div><div class="reg-col-text">${r.acoes||'—'}</div></div>
-            <div class="reg-col"><div class="reg-col-title">➡️ Próximos passos</div><div class="reg-col-text">${r.proximos||'—'}</div></div>
-          </div>
-        </div>`).join('');
+      const histItems = renderHistItems(i);
 
       const trendHtml = trend
         ? `<span class="kr-trend ${trend.cls}" id="trend-${i}">${trend.txt}</span>`
@@ -432,7 +491,7 @@ function renderKRs(){
               <button class="btn-add" onclick="addHist(${i})">+ Adicionar</button>
             </div>
             <div class="registros" id="hreg-${i}">
-              ${histItems||'<div class="empty-hist">Nenhum registro ainda. Adicione o primeiro acima!</div>'}
+              ${histItems}
             </div>
           </div>
         </div>
@@ -451,7 +510,8 @@ function updateKR(i){
 
   // registrar no histórico mensal para plotar nos gráficos
   if(kr.atual !== null && kr.type !== 'bin'){
-    const key = `${MN[now.getMonth()]}/${now.getFullYear()}`;
+    const mesEl = document.getElementById('mes-'+i);
+    const key = mesEl ? mesEl.value : `${MN[now.getMonth()]}/${now.getFullYear()}`;
     MONTHLY_VALS[i][key] = kr.atual;
   }
 
@@ -471,7 +531,7 @@ function updateKR(i){
   }
 
   updateSummary();
-  updateCharts();
+  updateCharts(i);
   saveData();
 }
 
@@ -505,27 +565,60 @@ function refreshHist(i){
   const reg = document.getElementById('hreg-'+i);
   const cnt = document.getElementById('hcount-'+i);
   cnt.textContent = HIST[i].length>0 ? '('+HIST[i].length+' registro'+(HIST[i].length>1?'s':'')+')' : '';
-  if(!HIST[i].length){ reg.innerHTML='<div class="empty-hist">Nenhum registro ainda. Adicione o primeiro acima!</div>'; return; }
-  reg.innerHTML = HIST[i].map((r,ri)=>`
-    <div class="reg-item">
-      <div class="reg-header">
-        <span class="reg-semana">${r.semana}</span>
-        <button class="reg-del" onclick="delHist(${i},${ri})" title="Remover">✕</button>
-      </div>
-      <div class="reg-cols">
-        <div class="reg-col"><div class="reg-col-title">🚀 O que fiz</div><div class="reg-col-text">${r.acoes||'—'}</div></div>
-        <div class="reg-col"><div class="reg-col-title">➡️ Próximos passos</div><div class="reg-col-text">${r.proximos||'—'}</div></div>
-      </div>
-    </div>`).join('');
+  reg.innerHTML = renderHistItems(i);
 }
 
 function updateSummary(){
-  const ea = KRS.filter(k=>k.status==='ea').length;
-  const ok = KRS.filter(k=>k.status==='ok').length;
-  const avg = Math.round(KRS.reduce((s,k)=>s+calcPct(k),0)/KRS.length);
+  const {ea,ok,pctSum} = KRS.reduce((acc,k)=>{
+    if(k.status==='ea') acc.ea++;
+    else if(k.status==='ok') acc.ok++;
+    acc.pctSum += calcPct(k);
+    return acc;
+  },{ea:0,ok:0,pctSum:0});
   document.getElementById('sum-ea').textContent = ea;
   document.getElementById('sum-ok').textContent = ok;
-  document.getElementById('sum-avg').textContent = avg+'%';
+  document.getElementById('sum-avg').textContent = Math.round(pctSum/KRS.length)+'%';
+}
+
+// ─── ANOTAÇÕES MENSAIS ────────────────────────────────────────
+function initNotes(){
+  const sel = document.getElementById('notes-mes');
+  sel.innerHTML = MESES.map(m=>`<option value="${m}/2026"${m===MESES[mesAtualIdx]?' selected':''}>${m}/2026</option>`).join('');
+  loadNotesMes();
+  updateNotesCount();
+}
+
+function loadNotesMes(){
+  const mes = document.getElementById('notes-mes').value;
+  document.getElementById('notes-ta').value = MONTHLY_NOTES[mes] || '';
+}
+
+let _notesSaveTimer = null;
+function saveNote(){
+  const mes = document.getElementById('notes-mes').value;
+  const txt = document.getElementById('notes-ta').value;
+  if(txt.trim()) MONTHLY_NOTES[mes] = txt;
+  else delete MONTHLY_NOTES[mes];
+  updateNotesCount();
+  // feedback visual temporário
+  clearTimeout(_notesSaveTimer);
+  const saved = document.getElementById('notes-saved');
+  saved.style.display = 'inline';
+  _notesSaveTimer = setTimeout(()=>{ saved.style.display='none'; }, 1500);
+  saveData();
+}
+
+function updateNotesCount(){
+  const n = Object.keys(MONTHLY_NOTES).filter(k=>MONTHLY_NOTES[k]&&MONTHLY_NOTES[k].trim()).length;
+  const cnt = document.getElementById('notes-count');
+  if(cnt) cnt.textContent = n > 0 ? `(${n} mês${n>1?'es':''} com anotação)` : '';
+}
+
+function toggleNotes(){
+  const body = document.getElementById('notes-body');
+  const tog = document.getElementById('notes-tog');
+  const open = body.classList.toggle('open');
+  tog.textContent = open ? '▲ Recolher' : '▼ Contexto para reuniões 1:1';
 }
 
 // ─── MODO APRESENTAÇÃO ────────────────────────────────────────
@@ -585,6 +678,15 @@ function buildCharts(){
     options:baseOpts('%',40,85,v=>v+'%')
   });
 
+  charts.nota_cons = new Chart(document.getElementById('ch-nota-cons'),{
+    type:'bar',
+    data:{labels:MESES,datasets:[
+      {label:'Nota média',data:Array(7).fill(null),backgroundColor:'rgba(133,79,11,0.7)',borderRadius:4},
+      {label:'Meta (8,0)',data:Array(7).fill(8),type:'line',borderColor:'#A32D2D',borderWidth:2,pointRadius:0,borderDash:[5,4],fill:false}
+    ]},
+    options:baseOpts('',0,10)
+  });
+
   updateCharts();
 }
 
@@ -596,16 +698,20 @@ function buildSeries(krIdx){
   });
 }
 
-function updateCharts(){
+function _setChartSeries(chart, dsIdx, krIdx){
+  chart.data.datasets[dsIdx].data = buildSeries(krIdx);
+  chart.update();
+}
+
+function updateCharts(changedKrIdx){
   if(!charts.impl) return;
-  charts.impl.data.datasets[1].data = buildSeries(0);  // KR0: dias implementação
-  charts.impl.update();
-  charts.nps.data.datasets[0].data  = buildSeries(5);  // KR5: nota go live
-  charts.nps.update();
-  charts.apto.data.datasets[0].data = buildSeries(7);  // KR7: % clientes aptos
-  charts.apto.update();
-  charts.cons.data.datasets[1].data = buildSeries(9);  // KR9: % utilização consultoria
-  charts.cons.update();
+  // Se changedKrIdx fornecido, atualiza só o gráfico afetado; senão atualiza todos
+  const all = changedKrIdx === undefined || !KR_CHART_IDXS.has(changedKrIdx);
+  if(all || changedKrIdx === KR_IDX_IMPL)      _setChartSeries(charts.impl,      1, KR_IDX_IMPL);
+  if(all || changedKrIdx === KR_IDX_NPS)       _setChartSeries(charts.nps,       0, KR_IDX_NPS);
+  if(all || changedKrIdx === KR_IDX_APTO)      _setChartSeries(charts.apto,      0, KR_IDX_APTO);
+  if(all || changedKrIdx === KR_IDX_CONS)      _setChartSeries(charts.cons,      1, KR_IDX_CONS);
+  if(all || changedKrIdx === KR_IDX_NOTA_CONS) _setChartSeries(charts.nota_cons, 0, KR_IDX_NOTA_CONS);
 }
 
 function switchTab(idx){
@@ -620,6 +726,7 @@ function _applyData(data){
   if(data.krs) data.krs.forEach((d,i)=>{ if(KRS[i]){ KRS[i].atual=d.atual; KRS[i].status=d.status; }});
   if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
   if(data.monthlyVals) data.monthlyVals.forEach((mv,i)=>{ if(MONTHLY_VALS[i] && mv) Object.assign(MONTHLY_VALS[i], mv); });
+  if(data.monthlyNotes) Object.assign(MONTHLY_NOTES, data.monthlyNotes);
   const el = document.getElementById('last-saved');
   if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
 }
@@ -627,33 +734,38 @@ function _applyData(data){
 function _buildPayload(extra){
   return Object.assign({
     savedAt: new Date().toISOString(),
-    version: 2,
+    version: 3,
     krs: KRS.map(k=>({atual:k.atual, status:k.status})),
     hist: HIST,
-    monthlyVals: MONTHLY_VALS
+    monthlyVals: MONTHLY_VALS,
+    monthlyNotes: MONTHLY_NOTES
   }, extra||{});
 }
 
 function saveData(){
-  const payload = _buildPayload();
-  const json = JSON.stringify(payload);
   try {
-    localStorage.setItem(STORAGE_KEY, json);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(_buildPayload()));
     const el = document.getElementById('last-saved');
     if(el) el.textContent = new Date().toLocaleString('pt-BR');
   } catch(e){ console.warn('Não foi possível salvar:', e); }
-  try {
-    const compressed = btoa(unescape(encodeURIComponent(json)));
-    history.replaceState(null,'','#d='+compressed);
-  } catch(e){ /* ignora se URL ficar grande demais */ }
+}
+
+// Encode/decode seguro para Unicode (substitui btoa/unescape deprecated)
+function _encodeState(json){
+  const bytes = new TextEncoder().encode(json);
+  return btoa(String.fromCharCode(...bytes));
+}
+function _decodeState(b64){
+  const binary = atob(b64);
+  const bytes = Uint8Array.from(binary, c=>c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
 
 function loadData(){
   try {
     const hash = window.location.hash;
     if(hash && hash.startsWith('#d=')){
-      const json = decodeURIComponent(escape(atob(hash.substring(3))));
-      _applyData(JSON.parse(json));
+      _applyData(JSON.parse(_decodeState(hash.substring(3))));
       const el = document.getElementById('save-source');
       if(el) el.textContent = '🔗 Dados carregados do link compartilhado';
       return;
@@ -668,7 +780,7 @@ function loadData(){
 function copyLink(){
   try {
     const json = JSON.stringify(_buildPayload());
-    const compressed = btoa(unescape(encodeURIComponent(json)));
+    const compressed = _encodeState(json);
     const url = window.location.origin + window.location.pathname + '#d=' + compressed;
     history.replaceState(null,'','#d='+compressed);
     navigator.clipboard.writeText(url)
@@ -696,6 +808,7 @@ function importData(event){
       saveData();
       renderKRs();
       updateCharts();
+      loadNotesMes(); updateNotesCount();
       const when = data.exportedAt ? ' | Exportado em: '+new Date(data.exportedAt).toLocaleString('pt-BR') : '';
       alert('Dados importados com sucesso!'+when);
     } catch(err){ alert('Erro ao importar: arquivo inválido.'); }
@@ -709,8 +822,10 @@ function clearData(){
   localStorage.removeItem(STORAGE_KEY);
   KRS.forEach(k=>{ k.atual=(k.type==='num')?null:0; k.status='ni'; });
   HIST.forEach((_,i)=>{ HIST[i]=[]; });
-  MONTHLY_VALS.forEach(mv=>{ Object.keys(mv).forEach(k=>delete mv[k]); });
+  MONTHLY_VALS.forEach((_,i)=>{ MONTHLY_VALS[i]={}; });
+  Object.keys(MONTHLY_NOTES).forEach(k=>delete MONTHLY_NOTES[k]);
   renderKRs(); updateCharts();
+  loadNotesMes(); updateNotesCount();
   const el = document.getElementById('last-saved');
   if(el) el.textContent = 'nunca';
   history.replaceState(null,'',window.location.pathname);
@@ -722,6 +837,7 @@ document.getElementById('foot-date').textContent = now.toLocaleDateString('pt-BR
 loadData();
 renderKRs();
 buildCharts();
+initNotes();
 </script>
 </body>
 </html>

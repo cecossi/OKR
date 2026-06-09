@@ -235,6 +235,9 @@ body.apresentacao .obj-section { display:block !important; }
       <select class="ki-mes-global" id="notes-mes" onchange="loadNotesMes()">
         <!-- preenchido por JS -->
       </select>
+      <select class="ki-mes-global" id="notes-ano" onchange="loadNotesMes()" style="width:72px;">
+        <!-- preenchido por JS -->
+      </select>
       <span class="notes-saved" id="notes-saved">✓ Salvo</span>
     </div>
     <textarea class="notes-ta" id="notes-ta" placeholder="Ex: Fechamos 3 projetos em julho, equipe em férias na 3ª semana, baseline de implementação subiu por novo cliente grande..." oninput="saveNote()"></textarea>
@@ -252,6 +255,10 @@ body.apresentacao .obj-section { display:block !important; }
   <div class="tab active" onclick="switchTab(0)">📦 Obj 1 · Prazo de Implementação</div>
   <div class="tab" onclick="switchTab(1)">⭐ Obj 2 · Qualidade no Go Live</div>
   <div class="tab" onclick="switchTab(2)">📈 Obj 3 · Consultoria</div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 4px;">
+    <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 Ano:</span>
+    <select class="ki" id="sel-ano-graficos" style="width:72px;padding:4px 6px;" onchange="updateCharts()"></select>
+  </div>
 </div>
 
 <!-- OBJ 1 -->
@@ -382,9 +389,14 @@ const MESES_HIST = ['Mai', ...MESES]; // seletor de mês: inclui maio como hist�
 
 const now = new Date();
 const mesAtualIdx = Math.max(0, Math.min(OKR_MONTHS - 1, now.getMonth() - OKR_START_MONTH));
+const OKR_YEAR = now.getFullYear();
+// Exibe ano atual + 4 anos à frente no seletor
+const ANOS = Array.from({length:5}, (_,i) => OKR_YEAR + i);
 
-// mês padrão do seletor de referência — pode ser sobrescrito pelo seed
-let defaultRefMes = MESES[mesAtualIdx] + '/2026';
+// mês+ano padrão do seletor de referência — pode ser sobrescrito pelo seed
+// formato: { mes: 'Jun', ano: 2026 }
+let defaultRefMes = MESES[mesAtualIdx];
+let defaultRefAno = OKR_YEAR;
 
 // Índices fixos dos KRs plotados nos gráficos
 const KR_IDX_IMPL      = 0;  // dias de implementação
@@ -454,7 +466,8 @@ function renderKRs(){
       const st = ST[kr.status];
       const trend = calcTrend(kr);
       let ctrl = '';
-      const mesOpts = MESES_HIST.map(m=>`<option value="${m}/2026"${(m+'/2026')===defaultRefMes?' selected':''}>${m}/2026</option>`).join('');
+      const mesOpts = MESES_HIST.map(m=>`<option value="${m}"${m===defaultRefMes?' selected':''}>${m}</option>`).join('');
+      const anoOpts = ANOS.map(a=>`<option value="${a}"${a===defaultRefAno?' selected':''}>${a}</option>`).join('');
       if(kr.type==='bin'){
         ctrl=`<label>Realizado?</label>
         <select class="ki ki-st" id="inp-${i}">
@@ -465,7 +478,8 @@ function renderKRs(){
         ctrl=`<label>Valor atual ${kr.unit}:</label>
         <input class="ki ki-num" id="inp-${i}" type="number" step="0.1" min="0" value="${kr.atual!==null?kr.atual:''}" placeholder="—">
         <label>Mês ref.:</label>
-        <select class="ki" id="mes-${i}" style="width:80px">${mesOpts}</select>`;
+        <select class="ki" id="mes-${i}" style="width:60px">${mesOpts}</select>
+        <select class="ki" id="ano-${i}" style="width:72px">${anoOpts}</select>`;
       }
       const histItems = renderHistItems(i);
 
@@ -543,8 +557,13 @@ function updateKR(i){
   // registrar no histórico mensal para plotar nos gráficos
   if(kr.atual !== null && kr.type !== 'bin'){
     const mesEl = document.getElementById('mes-'+i);
-    const key = mesEl ? mesEl.value : `${MN[now.getMonth()]}/${now.getFullYear()}`;
-    MONTHLY_VALS[i][key] = kr.atual;
+    const anoEl = document.getElementById('ano-'+i);
+    const mes = mesEl ? mesEl.value : MN[now.getMonth()];
+    const ano = anoEl ? parseInt(anoEl.value) : now.getFullYear();
+    MONTHLY_VALS[i][`${mes}/${ano}`] = kr.atual;
+    // atualiza o padrão global para próximas interações
+    defaultRefMes = mes;
+    defaultRefAno = ano;
   }
 
   const pct = calcPct(kr);
@@ -614,20 +633,27 @@ function updateSummary(){
 
 // ─── ANOTAÇÕES MENSAIS ────────────────────────────────────────
 function initNotes(){
-  const sel = document.getElementById('notes-mes');
-  sel.innerHTML = MESES_HIST.map(m=>`<option value="${m}/2026"${m===MESES[mesAtualIdx]?' selected':''}>${m}/2026</option>`).join('');
+  const selMes = document.getElementById('notes-mes');
+  const selAno = document.getElementById('notes-ano');
+  selMes.innerHTML = MESES_HIST.map(m=>`<option value="${m}"${m===MESES[mesAtualIdx]?' selected':''}>${m}</option>`).join('');
+  selAno.innerHTML = ANOS.map(a=>`<option value="${a}"${a===OKR_YEAR?' selected':''}>${a}</option>`).join('');
   loadNotesMes();
   updateNotesCount();
 }
 
+function _notesKey(){
+  const m = document.getElementById('notes-mes').value;
+  const a = document.getElementById('notes-ano').value;
+  return `${m}/${a}`;
+}
+
 function loadNotesMes(){
-  const mes = document.getElementById('notes-mes').value;
-  document.getElementById('notes-ta').value = MONTHLY_NOTES[mes] || '';
+  document.getElementById('notes-ta').value = MONTHLY_NOTES[_notesKey()] || '';
 }
 
 let _notesSaveTimer = null;
 function saveNote(){
-  const mes = document.getElementById('notes-mes').value;
+  const mes = _notesKey();
   const txt = document.getElementById('notes-ta').value;
   if(txt.trim()) MONTHLY_NOTES[mes] = txt;
   else delete MONTHLY_NOTES[mes];
@@ -722,10 +748,11 @@ function buildCharts(){
   updateCharts();
 }
 
-// Série histórica de 7 meses a partir de MONTHLY_VALS
+// Série histórica de 7 meses a partir de MONTHLY_VALS para o ano dos gráficos
 function buildSeries(krIdx){
+  const ano = parseInt(document.getElementById('sel-ano-graficos')?.value || OKR_YEAR);
   return MESES.map(m=>{
-    const v = MONTHLY_VALS[krIdx][`${m}/2026`];
+    const v = MONTHLY_VALS[krIdx][`${m}/${ano}`];
     return (v !== undefined && v !== null) ? v : null;
   });
 }
@@ -759,7 +786,11 @@ function _applyData(data){
   if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
   if(data.monthlyVals) data.monthlyVals.forEach((mv,i)=>{ if(MONTHLY_VALS[i] && mv) Object.assign(MONTHLY_VALS[i], mv); });
   if(data.monthlyNotes) Object.assign(MONTHLY_NOTES, data.monthlyNotes);
-  if(data.refMes) defaultRefMes = data.refMes;
+  if(data.refMes){
+    const parts = data.refMes.split('/');
+    defaultRefMes = parts[0];
+    defaultRefAno = parseInt(parts[1]) || OKR_YEAR;
+  }
   const el = document.getElementById('last-saved');
   if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
 }
@@ -768,6 +799,7 @@ function _buildPayload(extra){
   return Object.assign({
     savedAt: new Date().toISOString(),
     version: 3,
+    refMes: defaultRefMes + '/' + defaultRefAno,
     krs: KRS.map(k=>({atual:k.atual, status:k.status})),
     hist: HIST,
     monthlyVals: MONTHLY_VALS,
@@ -871,6 +903,11 @@ function clearData(){
 // ─── INIT ────────────────────────────────────────────────────
 document.getElementById('badge-mes').textContent = MN[now.getMonth()]+'/'+now.getFullYear();
 document.getElementById('foot-date').textContent = now.toLocaleDateString('pt-BR');
+// Popula seletor de ano dos gráficos
+(()=>{
+  const sel = document.getElementById('sel-ano-graficos');
+  ANOS.forEach(a=>{ const o=document.createElement('option'); o.value=a; o.textContent=a; if(a===OKR_YEAR) o.selected=true; sel.appendChild(o); });
+})();
 loadData();
 renderKRs();
 buildCharts();

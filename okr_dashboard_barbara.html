@@ -336,6 +336,33 @@ const MONTHLY_VALS = KRS.map(()=>({}));
 // anotações de contexto mensais: {'Jun/2026': 'texto...'}
 const MONTHLY_NOTES = {};
 
+// ─── SEED: dados de maio/2026 (carregados se não houver dados salvos) ──────
+const SEED_DATA = {
+  savedAt: '2026-05-31T23:59:59Z',
+  version: 3,
+  krs: [
+    {atual:64.5,  status:'at'},  // KR1: 64,5d média Jornada (8 proj mai/26) — acima da meta jun 39,6d
+    {atual:null,  status:'ni'},  // KR2: S/D
+    {atual:0,     status:'ni'},  // KR3: checklist não implantado
+    {atual:0,     status:'ea'},  // KR4: em andamento (sem % registrado)
+    {atual:0,     status:'ni'},  // KR5: mecanismo não implantado
+    {atual:null,  status:'ni'},  // KR6: S/D
+    {atual:0,     status:'ni'},  // KR7: checklist não implantado
+    {atual:null,  status:'ni'},  // KR8: S/D
+    {atual:null,  status:'ni'},  // KR9: S/D
+    {atual:42.28, status:'at'},  // KR10: 42,28% utilização — abaixo do baseline 47,9%
+    {atual:34.57, status:'ea'},  // KR11: 34,57% clientes usam ≥80% horas (meta: 70%)
+    {atual:25,    status:'ea'},  // KR12: 25 clientes 0h no trimestre
+    {atual:0,     status:'ni'},  // KR13: mecanismo não implantado
+    {atual:null,  status:'ni'},  // KR14: S/D
+  ],
+  hist: Array(14).fill(null).map(()=>[]),
+  monthlyVals: Array(14).fill(null).map(()=>({})),
+  monthlyNotes: {
+    'Jun/2026': 'Contexto Maio/2026 (baseline de entrada no período OKR):\n• KR1 — Prazo: 8 projetos fechados. Média geral 68,6d | Jornada 64,5d | Upgrade 72,8d. Meta jun/26: 39,6d. Clientes acima da meta: Coutinho (96d), Roberlei (78d), Guimarães (73d), Bernert (164d).\n• KR3 — Checklist migração: não implantado. Necessário antes dos próximos go lives.\n• KR10 — Utilização consultoria: 42,3% (baseline era 47,9%). 4 clientes sem uso: Higino Sordi, GAW Advogados, G.E.S. Toporoski, BBB → ação proativa necessária.\n• KR11 — 34,6% dos clientes usam ≥80% das horas contratadas (meta: 70%).\n• KR12 — 4 clientes identificados com 0h no mês.\nFonte: Planilha "Maio de 2026.xlsx" · Hydra · Projetos Jornada CPJ-3C.'
+  }
+};
+
 const ST = {
   ni:{cls:'s-ni',txt:'Não iniciado'},
   ea:{cls:'s-ea',txt:'Em andamento'},
@@ -773,8 +800,12 @@ function loadData(){
   } catch(e){ console.warn('Não foi possível carregar do hash:', e); }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) _applyData(JSON.parse(raw));
+    if(raw){ _applyData(JSON.parse(raw)); return; }
   } catch(e){ console.warn('Não foi possível carregar:', e); }
+  // Sem dados salvos — carrega baseline de maio/2026
+  _applyData(SEED_DATA);
+  const el = document.getElementById('save-source');
+  if(el) el.textContent = '📋 Baseline mai/2026 carregado da planilha';
 }
 
 function copyLink(){

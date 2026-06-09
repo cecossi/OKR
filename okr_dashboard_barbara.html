@@ -156,6 +156,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-clr{padding:5px 13px;background:var(--red-bg);color:var(--red);border:1px solid #f5c6c6;border-radius:20px;font-size:12px;cursor:pointer;font-weight:700;}
 .btn-exp:hover,.btn-imp:hover,.btn-clr:hover,.btn-link:hover{opacity:.85;}
 
+/* ANÁLISE MENSAL */
+.anl-sel-row{display:flex;align-items:center;gap:8px;margin-bottom:var(--gap);background:var(--card);padding:10px 14px;border-radius:var(--radius);box-shadow:var(--shadow-sm);}
+.anl-sel-row label{font-size:11px;font-weight:700;color:var(--text2);}
+.anl-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:14px 16px;}
+.anl-kpi{text-align:center;}
+.anl-kpi-val{font-size:24px;font-weight:800;line-height:1;margin-bottom:3px;}
+.anl-kpi-lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.anl-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:var(--gap);overflow:hidden;}
+.anl-card-hdr{padding:13px 18px;border-bottom:1px solid #f0f2f6;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+.anl-card-title{font-size:13px;font-weight:700;color:var(--text);}
+.anl-table-wrap{overflow-x:auto;}
+.anl-table{width:100%;border-collapse:collapse;font-size:12px;}
+.anl-table th{background:#f8f9fb;padding:8px 12px;text-align:left;font-weight:700;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #f0f2f6;white-space:nowrap;}
+.anl-table td{padding:8px 12px;border-bottom:1px solid #f0f2f6;color:var(--text);vertical-align:middle;}
+.anl-table tr:last-child td{border-bottom:none;}
+.anl-table tbody tr:hover td{background:#f8f9fb;}
+.anl-table .row-total td{background:#f8f9fb;font-weight:700;}
+.anl-fonte{font-size:10px;color:var(--text2);padding:8px 16px;border-top:1px solid #f0f2f6;font-style:italic;}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;}
+.tag-ok{background:var(--green-bg);color:var(--green);}
+.tag-warn{background:var(--amber-bg);color:var(--amber);}
+.tag-bad{background:var(--red-bg);color:var(--red);}
+.tag-blue{background:var(--blue-bg);color:var(--blue);}
+.tag-gray{background:var(--gray-bg);color:var(--gray);}
+.anl-empty{font-size:13px;color:var(--text2);text-align:center;padding:40px 20px;font-style:italic;}
+.anl-section-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin:var(--gap) 0 8px;padding-left:2px;}
+
 /* ANOTAÇÕES MENSAIS */
 .notes-panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);margin-bottom:var(--gap);}
 .notes-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;cursor:pointer;user-select:none;}
@@ -255,6 +282,7 @@ body.apresentacao .obj-section { display:block !important; }
   <div class="tab active" onclick="switchTab(0)">📦 Obj 1 · Prazo de Implementação</div>
   <div class="tab" onclick="switchTab(1)">⭐ Obj 2 · Qualidade no Go Live</div>
   <div class="tab" onclick="switchTab(2)">📈 Obj 3 · Consultoria</div>
+  <div class="tab" onclick="switchTab(3)">📊 Análise Mensal</div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 4px;">
     <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 Ano:</span>
     <select class="ki" id="sel-ano-graficos" style="width:72px;padding:4px 6px;" onchange="updateCharts()"></select>
@@ -310,6 +338,23 @@ body.apresentacao .obj-section { display:block !important; }
   <div class="charts-row">
     <div class="chart-card"><h3>⭐ Nota média nos atendimentos de consultoria (0–10)</h3><div class="chart-wrap"><canvas id="ch-nota-cons" role="img" aria-label="Nota consultoria"></canvas></div></div>
   </div>
+</div>
+
+<!-- ANÁLISE MENSAL -->
+<div class="obj-section" id="obj3">
+  <div class="obj-header" style="background:linear-gradient(135deg,#1a1a2e,#2d2d4e);">
+    <div class="obj-icon">📊</div>
+    <div>
+      <div class="obj-title">Análise Mensal — Projetos · Horas Time · Consultoria</div>
+      <div class="obj-sub">Dados detalhados por mês de referência</div>
+    </div>
+  </div>
+  <div class="anl-sel-row">
+    <label style="font-size:13px;font-weight:600;color:var(--text2);">Mês de referência:</label>
+    <select class="ki" id="anl-mes" style="width:70px;" onchange="renderAnalysis()"></select>
+    <select class="ki" id="anl-ano" style="width:80px;" onchange="renderAnalysis()"></select>
+  </div>
+  <div id="anl-content"></div>
 </div>
 
 <div class="footer">Preâmbulo Tech · CPJ-3C · Atualizado em <span id="foot-date"></span></div>
@@ -368,6 +413,71 @@ const SEED_DATA = {
   monthlyVals: Array(14).fill(null).map(()=>({})),
   monthlyNotes: {
     'Jun/2026': 'Contexto Maio/2026 (baseline de entrada no período OKR):\n• KR1 — Prazo: 8 projetos fechados. Média geral 68,6d | Jornada 64,5d | Upgrade 72,8d. Meta jun/26: 39,6d. Clientes acima da meta: Coutinho (96d), Roberlei (78d), Guimarães (73d), Bernert (164d).\n• KR3 — Checklist migração: não implantado. Necessário antes dos próximos go lives.\n• KR10 — Utilização consultoria: 42,3% (baseline era 47,9%). 4 clientes sem uso: Higino Sordi, GAW Advogados, G.E.S. Toporoski, BBB → ação proativa necessária.\n• KR11 — 34,6% dos clientes usam ≥80% das horas contratadas (meta: 70%).\n• KR12 — 4 clientes identificados com 0h no mês.\nFonte: Planilha "Maio de 2026.xlsx" · Hydra · Projetos Jornada CPJ-3C.'
+  }
+};
+
+// ─── ANÁLISES MENSAIS ────────────────────────────────────────
+const MONTHLY_ANALYSIS = {
+  'Mai/2026': {
+    projetos: {
+      fonte: 'Fechados_em_maio_de_2026.xlsx · Produto CPJ-3C · Subcategorias: JORNADA e UPGRADE',
+      resumo: {total:8,jornada:4,upgrade:4,mediaDias:68.6,mediaJornada:64.5,mediaUpgrade:72.8,metaMes:39.6},
+      lista: [
+        {cliente:'Coutinho e Oliveira Soc. de Advogados',    resp:'Claudine Max Strapasson', enc:'05/05/2026', dias:96,  tipo:'JORNADA', st:'bad'},
+        {cliente:'Guimarães e Bordinhão Advogados Assoc.',   resp:'Claudine Max Strapasson', enc:'14/05/2026', dias:73,  tipo:'JORNADA', st:'bad'},
+        {cliente:'Roberlei Queiroz - Soc. Ind. de Advocacia',resp:'Claudine Max Strapasson', enc:'26/05/2026', dias:78,  tipo:'JORNADA', st:'bad'},
+        {cliente:'Cavalcanti Mendes Advogados',              resp:'Priscila Antunes',        enc:'26/05/2026', dias:11,  tipo:'JORNADA', st:'ok'},
+        {cliente:'Bernert Sociedade de Advogados',           resp:'Claudine Max Strapasson', enc:'08/05/2026', dias:164, tipo:'UPGRADE', st:'bad'},
+        {cliente:'Maranhão de Loyola & Nogueira Adv.',       resp:'Priscila Antunes',        enc:'11/05/2026', dias:56,  tipo:'UPGRADE', st:'warn'},
+        {cliente:'Tedeschi Advogados Associados',            resp:'Claudine Max Strapasson', enc:'29/05/2026', dias:45,  tipo:'UPGRADE', st:'warn'},
+        {cliente:'Tônia Alteiro Groenwold - Soc. Individual',resp:'Priscila Antunes',        enc:'25/05/2026', dias:26,  tipo:'UPGRADE', st:'ok'},
+      ]
+    },
+    horasTime: {
+      fonte: 'Hydra · Tarefas executadas + em andamento · Todas as categorias · CPJ-3C e demais · Capacidade ref: 128h/mês (80% contratado)',
+      capacidade: 128,
+      lista: [
+        {colab:'Rosane Maria Welker',         horas:123.85, pct:0.202, obs:''},
+        {colab:'Jeferson Strapasson',         horas:115.87, pct:0.189, obs:''},
+        {colab:'Gilmar Friguetto',            horas:111.83, pct:0.182, obs:''},
+        {colab:'Diogo Pastoriza Sant Helena', horas:107.98, pct:0.176, obs:''},
+        {colab:'Edercion Luiz Komincki',      horas:96.58,  pct:0.157, obs:''},
+        {colab:'Jhenifer Machado',            horas:53.22,  pct:0.087, obs:'Férias 04–13/05'},
+        {colab:'Anna Flora C. de Oliveira',   horas:4.43,   pct:0.007, obs:'Férias 04–18/05 + projeto RMS'},
+      ]
+    },
+    consultoria: {
+      fonte: 'Hydra · Categoria CONSULTORIA + Produto CPJ-3C · HS Vendidas base: 781h · HS Executadas: 330,2h · Hapner & Kroetz: faturamento pós-uso',
+      resumo: {taxa:0.423,metaMes:0.525,clientesAcima80:0.346,clientes0h:4},
+      topClientes: [
+        {cliente:'Farracha de Castro Advogados Assoc.',     hsExec:25.17, taxa:0.5136, consultor:'Jeferson Strapasson', st:'warn'},
+        {cliente:'Rocha, Marinho e Sales Soc. Advogados',  hsExec:20.67, taxa:4.1333, consultor:'Jeferson Strapasson', st:'ok'},
+        {cliente:'Sanepar - Pju / Cdi',                    hsExec:16.93, taxa:0.8911, consultor:'Jeferson Strapasson', st:'ok'},
+        {cliente:'Crespo e Caires Advogados Assoc.',       hsExec:14.80, taxa:0.7400, consultor:'Diogo Helena',        st:'warn'},
+        {cliente:'Vernalha Pereira Advogados',             hsExec:14.25, taxa:0.8906, consultor:'Jeferson Strapasson', st:'ok'},
+        {cliente:'Lima, Cabral Advogados Assoc.',          hsExec:13.75, taxa:0.8594, consultor:'Gilmar Friguetto',    st:'ok'},
+        {cliente:'Filla & Munhoz da Rocha Adv. Assoc.',   hsExec:11.47, taxa:1.1467, consultor:'Rosane Welker',       st:'ok'},
+        {cliente:'Santiago Advogados Assoc. - Sister',    hsExec:10.82, taxa:1.3521, consultor:'Diogo Helena',        st:'ok'},
+        {cliente:'Ferrari Turra, Bona Turra & Advogados', hsExec:10.33, taxa:1.1481, consultor:'Edercion Komincki',   st:'ok'},
+        {cliente:'Perez de Rezende - Advogados',          hsExec:10.00, taxa:0.4762, consultor:'Diogo Helena',        st:'warn'},
+        {cliente:'Maciel Antunes Advogados',              hsExec:9.93,  taxa:0.9933, consultor:'Rosane Welker',       st:'ok'},
+        {cliente:'Bonatto & Bonatto Advogados Assoc.',    hsExec:8.75,  taxa:1.0938, consultor:'Gilmar Friguetto',    st:'ok'},
+        {cliente:'Hapner & Kroetz Advogados S/C',         hsExec:8.33,  taxa:null,   consultor:'Jeferson Strapasson', st:'info'},
+        {cliente:'Didier, Sodré e Rosa Adv. e Consultoria',hsExec:8.25, taxa:1.3750, consultor:'Jeferson Strapasson', st:'ok'},
+        {cliente:'André Menescal Advogados',              hsExec:7.87,  taxa:0.6051, consultor:'Rosane Welker',       st:'warn'},
+        {cliente:'Dunice e Marcon Advogados Assoc.',      hsExec:7.30,  taxa:0.6083, consultor:'Rosane Welker',       st:'warn'},
+        {cliente:'Dotti Advogados',                       hsExec:6.08,  taxa:1.0139, consultor:'Gilmar Friguetto',    st:'ok'},
+        {cliente:'Gomes Coelho & Bordin - Soc. Advogados',hsExec:6.00,  taxa:1.5000, consultor:'Edercion Komincki',   st:'ok'},
+        {cliente:'Bonini Guedes Advocacia',               hsExec:5.20,  taxa:1.3000, consultor:'Edercion Komincki',   st:'ok'},
+        {cliente:'Bassetto Advogados',                    hsExec:4.92,  taxa:1.6389, consultor:'Edercion Komincki',   st:'ok'},
+      ],
+      clientes0h: [
+        {cliente:'Higino, Sordi, Sousa, Toledano & Adv.', hsCont:4, consultor:'Anna Oliveira'},
+        {cliente:'GAW Advogados Associados',               hsCont:4, consultor:'Diogo Helena'},
+        {cliente:'Guilherme Eduardo Stutz Toporoski',      hsCont:2, consultor:'Edercion Komincki'},
+        {cliente:'BBB',                                    hsCont:1, consultor:'Edercion Komincki'},
+      ]
+    }
   }
 };
 
@@ -776,6 +886,116 @@ function updateCharts(changedKrIdx){
 function switchTab(idx){
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
   document.querySelectorAll('.obj-section').forEach((s,i)=>s.classList.toggle('active',i===idx));
+  if(idx===3) renderAnalysis();
+}
+
+// ─── ANÁLISE MENSAL ───────────────────────────────────────────
+function renderAnalysis(){
+  const mes = document.getElementById('anl-mes')?.value || 'Mai';
+  const ano = document.getElementById('anl-ano')?.value || OKR_YEAR;
+  const key = `${mes}/${ano}`;
+  const el  = document.getElementById('anl-content');
+  if(!el) return;
+  const data = MONTHLY_ANALYSIS[key];
+  if(!data){
+    el.innerHTML = `<div class="anl-empty">Sem análise registrada para <strong>${key}</strong>.<br>Os dados serão adicionados ao fechar o mês.</div>`;
+    return;
+  }
+  const stTag = s => {
+    if(s==='ok')   return '<span class="tag tag-ok">✅ No prazo</span>';
+    if(s==='warn') return '<span class="tag tag-warn">⚠️ Atenção</span>';
+    if(s==='bad')  return '<span class="tag tag-bad">🔴 Fora do prazo</span>';
+    if(s==='info') return '<span class="tag tag-blue">ℹ️ Pós-faturamento</span>';
+    return '<span class="tag tag-gray">—</span>';
+  };
+  const pct = v => v != null ? (v*100).toFixed(1)+'%' : '—';
+  const fmt = v => v != null ? v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+
+  // ── KPIs resumo ──
+  const p = data.projetos.resumo;
+  const h = data.horasTime;
+  const c = data.consultoria.resumo;
+  const totalH = h.lista.reduce((s,x)=>s+x.horas,0);
+
+  let html = `
+  <div class="anl-kpis">
+    <div class="anl-kpi"><div class="anl-kpi-val">${p.total}</div><div class="anl-kpi-lbl">Projetos encerrados</div></div>
+    <div class="anl-kpi"><div class="anl-kpi-val">${p.mediaDias}d</div><div class="anl-kpi-lbl">Média geral (dias)</div></div>
+    <div class="anl-kpi"><div class="anl-kpi-val">${totalH.toFixed(1)}h</div><div class="anl-kpi-lbl">Horas time (total)</div></div>
+    <div class="anl-kpi"><div class="anl-kpi-val">${pct(c.taxa)}</div><div class="anl-kpi-lbl">Taxa utilização consult.</div></div>
+    <div class="anl-kpi"><div class="anl-kpi-val">${pct(c.clientesAcima80)}</div><div class="anl-kpi-lbl">Clientes ≥80% utilizados</div></div>
+    <div class="anl-kpi"><div class="anl-kpi-val">${c.clientes0h}</div><div class="anl-kpi-lbl">Clientes sem utilização</div></div>
+  </div>`;
+
+  // ── Projetos ──
+  html += `
+  <div class="anl-card">
+    <div class="anl-card-hdr">
+      <span class="anl-card-title">📦 Projetos encerrados em ${key}</span>
+      <span style="font-size:12px;color:var(--text2);">Jornada: ${p.jornada} · Upgrade: ${p.upgrade} · Média Jornada: ${p.mediaJornada}d · Média Upgrade: ${p.mediaUpgrade}d · Meta ${MN[OKR_START_MONTH]}/${ano}: ${p.metaMes}d</span>
+    </div>
+    <div class="anl-table-wrap">
+      <table class="anl-table">
+        <thead><tr><th>Cliente</th><th>Responsável</th><th>Encerrado</th><th>Tipo</th><th>Dias</th><th>Status</th></tr></thead>
+        <tbody>`;
+  data.projetos.lista.forEach(r=>{
+    html+=`<tr><td>${r.cliente}</td><td>${r.resp}</td><td>${r.enc}</td><td><span class="tag tag-blue">${r.tipo}</span></td><td style="text-align:right;font-weight:700;">${r.dias}d</td><td>${stTag(r.st)}</td></tr>`;
+  });
+  html+=`</tbody></table></div>
+    <div class="anl-fonte">Fonte: ${data.projetos.fonte}</div>
+  </div>`;
+
+  // ── Horas Time ──
+  html += `
+  <div class="anl-card">
+    <div class="anl-card-hdr">
+      <span class="anl-card-title">👥 Horas Time — ${key}</span>
+      <span style="font-size:12px;color:var(--text2);">Total: ${totalH.toFixed(1)}h · Capacidade ref: ${h.capacidade}h/pessoa</span>
+    </div>
+    <div class="anl-table-wrap">
+      <table class="anl-table">
+        <thead><tr><th>Colaborador</th><th style="text-align:right">Horas</th><th style="text-align:right">% do total</th><th>Obs</th></tr></thead>
+        <tbody>`;
+  h.lista.forEach(r=>{
+    const pctReal = (r.horas/totalH*100).toFixed(1);
+    html+=`<tr><td>${r.colab}</td><td style="text-align:right;font-weight:700;">${fmt(r.horas)}h</td><td style="text-align:right;">${pctReal}%</td><td style="color:var(--text2);font-size:12px;">${r.obs||'—'}</td></tr>`;
+  });
+  html+=`</tbody></table></div>
+    <div class="anl-fonte">Fonte: ${h.fonte}</div>
+  </div>`;
+
+  // ── Consultoria top clientes ──
+  html += `
+  <div class="anl-card">
+    <div class="anl-card-hdr">
+      <span class="anl-card-title">📈 Consultoria — Top clientes ${key}</span>
+      <span style="font-size:12px;color:var(--text2);">Taxa geral: ${pct(c.taxa)} · Meta ${MN[OKR_START_MONTH]}/${ano}: ${pct(c.metaMes)} · Clientes ≥80%: ${pct(c.clientesAcima80)}</span>
+    </div>
+    <div class="anl-table-wrap">
+      <table class="anl-table">
+        <thead><tr><th>Cliente</th><th style="text-align:right">HS Exec.</th><th style="text-align:right">Taxa util.</th><th>Consultor</th><th>Status</th></tr></thead>
+        <tbody>`;
+  data.consultoria.topClientes.forEach(r=>{
+    const taxaStr = r.taxa!=null ? (r.taxa*100).toFixed(1)+'%' : '—';
+    html+=`<tr><td>${r.cliente}</td><td style="text-align:right;font-weight:700;">${fmt(r.hsExec)}h</td><td style="text-align:right;">${taxaStr}</td><td style="font-size:12px;">${r.consultor}</td><td>${stTag(r.st)}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+
+  // ── Clientes 0h ──
+  html+=`
+    <div class="anl-section-title" style="margin:16px 0 8px;">⚠️ Clientes sem utilização (${data.consultoria.clientes0h.length})</div>
+    <div class="anl-table-wrap">
+      <table class="anl-table">
+        <thead><tr><th>Cliente</th><th style="text-align:right">HS Contratadas</th><th>Consultor resp.</th></tr></thead>
+        <tbody>`;
+  data.consultoria.clientes0h.forEach(r=>{
+    html+=`<tr><td>${r.cliente}</td><td style="text-align:right;">${r.hsCont}h</td><td>${r.consultor}</td></tr>`;
+  });
+  html+=`</tbody></table></div>
+    <div class="anl-fonte">Fonte: ${data.consultoria.fonte}</div>
+  </div>`;
+
+  el.innerHTML = html;
 }
 
 // ─── PERSISTÊNCIA ────────────────────────────────────────────
@@ -912,6 +1132,15 @@ loadData();
 renderKRs();
 buildCharts();
 initNotes();
+// ── Seletores Análise Mensal ──
+(()=>{
+  const selM = document.getElementById('anl-mes');
+  const selA = document.getElementById('anl-ano');
+  if(selM && selA){
+    MESES_HIST.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; if(m==='Mai') o.selected=true; selM.appendChild(o); });
+    ANOS.forEach(a=>{ const o=document.createElement('option'); o.value=a; o.textContent=a; if(a===OKR_YEAR) o.selected=true; selA.appendChild(o); });
+  }
+})();
 </script>
 </body>
 </html>

@@ -260,6 +260,7 @@ body.apresentacao .obj-section { display:block !important; }
     <button class="btn-link" onclick="copyLink()">🔗 Copiar link</button>
     <button class="btn-exp" onclick="exportData()">⬇️ Exportar JSON</button>
     <label class="btn-imp" style="cursor:pointer">⬆️ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+    <label class="btn-imp" style="cursor:pointer;background:#2C3799;">📥 Análise Mensal<input type="file" accept=".json" style="display:none" onchange="importAnalysis(event)"></label>
     <button class="btn-clr" onclick="clearData()">🗑️ Limpar dados</button>
   </span>
 </div>
@@ -1123,6 +1124,51 @@ function importData(event){
   reader.readAsText(file);
 }
 
+// ─── IMPORTAR ANÁLISE MENSAL (JSON gerado pelo script Python) ────────────────
+const ANALYSIS_STORAGE_KEY = 'okr_barbara_analysis_v1';
+
+// Carrega análises salvas do localStorage e mescla com as hardcoded (MONTHLY_ANALYSIS)
+function loadSavedAnalyses(){
+  try {
+    const raw = localStorage.getItem(ANALYSIS_STORAGE_KEY);
+    if(raw) Object.assign(MONTHLY_ANALYSIS, JSON.parse(raw));
+  } catch(e){ console.warn('Erro ao carregar análises salvas:', e); }
+}
+
+function importAnalysis(event){
+  const file = (event.target.files||[])[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = JSON.parse(e.target.result);
+      // data é um objeto { "Jun/2026": {...}, ... }
+      const chaves = Object.keys(data);
+      if(!chaves.length || !chaves[0].match(/^[A-Za-z]{3}\/\d{4}$/))
+        throw new Error('Formato inválido');
+      Object.assign(MONTHLY_ANALYSIS, data);
+      // persiste no localStorage
+      try {
+        const saved = JSON.parse(localStorage.getItem(ANALYSIS_STORAGE_KEY)||'{}');
+        Object.assign(saved, data);
+        localStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(saved));
+      } catch(e2){ console.warn('Não foi possível persistir análise:', e2); }
+      // se já está na aba análise, re-renderiza
+      const selM = document.getElementById('anl-mes');
+      const selA = document.getElementById('anl-ano');
+      if(selM && chaves[0]){
+        const [m, a] = chaves[0].split('/');
+        selM.value = m;
+        if(selA) selA.value = a;
+      }
+      renderAnalysis();
+      alert(`✅ Análise importada com sucesso!\nPeríodo: ${chaves.join(', ')}`);
+    } catch(err){ alert('Erro ao importar análise: arquivo inválido.\n'+err.message); }
+    event.target.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
 function clearData(){
   if(!confirm('Tem certeza que deseja limpar todos os dados salvos? Esta ação não pode ser desfeita.')) return;
   localStorage.removeItem(STORAGE_KEY);
@@ -1146,6 +1192,7 @@ document.getElementById('foot-date').textContent = now.toLocaleDateString('pt-BR
   ANOS.forEach(a=>{ const o=document.createElement('option'); o.value=a; o.textContent=a; if(a===OKR_YEAR) o.selected=true; sel.appendChild(o); });
 })();
 loadData();
+loadSavedAnalyses();
 renderKRs();
 buildCharts();
 initNotes();

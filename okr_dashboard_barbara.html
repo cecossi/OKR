@@ -428,13 +428,7 @@ const SEED_DATA = {
     {atual:null,  status:'ni'},  // KR14: S/D
   ],
   hist: Array(14).fill(null).map(()=>[]),
-  monthlyVals: (()=>{
-    const mv = Array(14).fill(null).map(()=>({}));
-    mv[0]['Mai/2026']  = 64.5;  // KR1: média jornada mai/26
-    mv[9]['Mai/2026']  = 42.28; // KR10: taxa utilização consultoria mai/26
-    mv[10]['Mai/2026'] = 34.57; // KR11: % clientes ≥80h mai/26
-    return mv;
-  })(),
+  monthlyVals: Array(14).fill(null).map(()=>({})),
   monthlyNotes: {
     'Jun/2026': 'Contexto Maio/2026 (baseline de entrada no período OKR):\n• KR1 — Prazo: 8 projetos fechados. Média geral 68,6d | Jornada 64,5d | Upgrade 72,8d. Meta jun/26: 39,6d. Clientes acima da meta: Coutinho (96d), Roberlei (78d), Guimarães (73d), Bernert (164d).\n• KR3 — Checklist migração: não implantado. Necessário antes dos próximos go lives.\n• KR10 — Utilização consultoria: 42,3% (baseline era 47,9%). 4 clientes sem uso: Higino Sordi, GAW Advogados, G.E.S. Toporoski, BBB → ação proativa necessária.\n• KR11 — 34,6% dos clientes usam ≥80% das horas contratadas (meta: 70%).\n• KR12 — 4 clientes identificados com 0h no mês.\nFonte: Planilha "Maio de 2026.xlsx" · Hydra · Projetos Jornada CPJ-3C.'
   }
@@ -512,16 +506,18 @@ const ST = {
   at:{cls:'s-at',txt:'Atrasado'}
 };
 
-// null no índice 0 = Mai (baseline pré-período, sem meta definida)
-const DIAS_ALVO = [null,39.6,37.2,34.8,32.4,30,27.6,25.2];
-const CONS_ALVO = [null,52.5,57.1,61.7,66.3,70.9,75.5,80.0];
+// Trajetória de metas Jun→Dez (7 pontos, período OKR)
+const DIAS_ALVO = [39.6,37.2,34.8,32.4,30,27.6,25.2];
+const CONS_ALVO = [52.5,57.1,61.7,66.3,70.9,75.5,80.0];
+// Baseline março/26 — referência usada para definir as metas
+const BASE_IMPL = 42;    // 42 dias (mar/26)
+const BASE_CONS = 47.9;  // 47,9% (mar/26)
 
 const MN = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const OKR_START_MONTH = 5;  // junho (0-indexed)
 const OKR_MONTHS = 7;       // jun → dez
 const MESES = MN.slice(OKR_START_MONTH, OKR_START_MONTH + OKR_MONTHS);
 const MESES_HIST   = ['Mai', ...MESES]; // seletor de mês: inclui maio como histórico
-const CHART_LABELS = ['Mai', ...MESES]; // eixo X dos gráficos: mai (baseline) + jun-dez
 
 const now = new Date();
 const mesAtualIdx = Math.max(0, Math.min(OKR_MONTHS - 1, now.getMonth() - OKR_START_MONTH));
@@ -838,11 +834,12 @@ function buildCharts(){
 
   charts.impl = new Chart(document.getElementById('ch-impl'),{
     type:'line',
-    data:{labels:CHART_LABELS,datasets:[
-      {label:'Alvo (dias)',data:DIAS_ALVO,borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,0.07)',borderWidth:2,pointRadius:4,tension:.3,fill:true,spanGaps:false},
-      {label:'Realizado',data:Array(8).fill(null),borderColor:'#2C3799',backgroundColor:'rgba(44,55,153,0.07)',borderWidth:2,pointRadius:4,tension:.3,borderDash:[5,4],spanGaps:false}
+    data:{labels:MESES,datasets:[
+      {label:'Alvo (dias)',data:DIAS_ALVO,borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,0.07)',borderWidth:2,pointRadius:4,tension:.3,fill:true},
+      {label:'Realizado',data:Array(7).fill(null),borderColor:'#2C3799',backgroundColor:'rgba(44,55,153,0.08)',borderWidth:2,pointRadius:5,tension:.3,borderDash:[5,4]},
+      {label:`Baseline mar/26 (${BASE_IMPL}d)`,data:Array(7).fill(BASE_IMPL),borderColor:'#A32D2D',borderWidth:1.5,pointRadius:0,borderDash:[3,3],fill:false}
     ]},
-    options:baseOpts('dias',20,75)
+    options:baseOpts('dias',20,50)
   });
 
   charts.nps = new Chart(document.getElementById('ch-nps'),{
@@ -865,11 +862,12 @@ function buildCharts(){
 
   charts.cons = new Chart(document.getElementById('ch-cons'),{
     type:'line',
-    data:{labels:CHART_LABELS,datasets:[
-      {label:'Alvo (%)',data:CONS_ALVO,borderColor:'#854F0B',backgroundColor:'rgba(133,79,11,0.07)',borderWidth:2,pointRadius:4,tension:.3,fill:true,spanGaps:false},
-      {label:'Realizado',data:Array(8).fill(null),borderColor:'#2C3799',backgroundColor:'rgba(44,55,153,0.07)',borderWidth:2,pointRadius:4,tension:.3,borderDash:[5,4],spanGaps:false}
+    data:{labels:MESES,datasets:[
+      {label:'Alvo (%)',data:CONS_ALVO,borderColor:'#854F0B',backgroundColor:'rgba(133,79,11,0.07)',borderWidth:2,pointRadius:4,tension:.3,fill:true},
+      {label:'Realizado',data:Array(7).fill(null),borderColor:'#2C3799',backgroundColor:'rgba(44,55,153,0.08)',borderWidth:2,pointRadius:5,tension:.3,borderDash:[5,4]},
+      {label:`Baseline mar/26 (${BASE_CONS}%)`,data:Array(7).fill(BASE_CONS),borderColor:'#A32D2D',borderWidth:1.5,pointRadius:0,borderDash:[3,3],fill:false}
     ]},
-    options:baseOpts('%',35,85,v=>v+'%')
+    options:baseOpts('%',40,85,v=>v+'%')
   });
 
   charts.nota_cons = new Chart(document.getElementById('ch-nota-cons'),{
@@ -887,7 +885,7 @@ function buildCharts(){
 // Série histórica de 7 meses a partir de MONTHLY_VALS para o ano dos gráficos
 function buildSeries(krIdx){
   const ano = parseInt(document.getElementById('sel-ano-graficos')?.value || OKR_YEAR);
-  return CHART_LABELS.map(m=>{
+  return MESES.map(m=>{
     const v = MONTHLY_VALS[krIdx][`${m}/${ano}`];
     return (v !== undefined && v !== null) ? v : null;
   });

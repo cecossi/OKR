@@ -340,6 +340,7 @@ const MONTHLY_NOTES = {};
 const SEED_DATA = {
   savedAt: '2026-05-31T23:59:59Z',
   version: 3,
+  refMes: 'Mai/2026',
   krs: [
     {atual:64.5,  status:'at'},  // KR1: 64,5d média Jornada (8 proj mai/26) — acima da meta jun 39,6d
     {atual:null,  status:'ni'},  // KR2: S/D
@@ -377,9 +378,13 @@ const MN = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','D
 const OKR_START_MONTH = 5;  // junho (0-indexed)
 const OKR_MONTHS = 7;       // jun → dez
 const MESES = MN.slice(OKR_START_MONTH, OKR_START_MONTH + OKR_MONTHS);
+const MESES_HIST = ['Mai', ...MESES]; // seletor de mês: inclui maio como histórico
 
 const now = new Date();
 const mesAtualIdx = Math.max(0, Math.min(OKR_MONTHS - 1, now.getMonth() - OKR_START_MONTH));
+
+// mês padrão do seletor de referência — pode ser sobrescrito pelo seed
+let defaultRefMes = MESES[mesAtualIdx] + '/2026';
 
 // Índices fixos dos KRs plotados nos gráficos
 const KR_IDX_IMPL      = 0;  // dias de implementação
@@ -449,7 +454,7 @@ function renderKRs(){
       const st = ST[kr.status];
       const trend = calcTrend(kr);
       let ctrl = '';
-      const mesOpts = MESES.map(m=>`<option value="${m}/2026"${m===MESES[mesAtualIdx]?' selected':''}>${m}</option>`).join('');
+      const mesOpts = MESES_HIST.map(m=>`<option value="${m}/2026"${(m+'/2026')===defaultRefMes?' selected':''}>${m}/2026</option>`).join('');
       if(kr.type==='bin'){
         ctrl=`<label>Realizado?</label>
         <select class="ki ki-st" id="inp-${i}">
@@ -610,7 +615,7 @@ function updateSummary(){
 // ─── ANOTAÇÕES MENSAIS ────────────────────────────────────────
 function initNotes(){
   const sel = document.getElementById('notes-mes');
-  sel.innerHTML = MESES.map(m=>`<option value="${m}/2026"${m===MESES[mesAtualIdx]?' selected':''}>${m}/2026</option>`).join('');
+  sel.innerHTML = MESES_HIST.map(m=>`<option value="${m}/2026"${m===MESES[mesAtualIdx]?' selected':''}>${m}/2026</option>`).join('');
   loadNotesMes();
   updateNotesCount();
 }
@@ -754,6 +759,7 @@ function _applyData(data){
   if(data.hist) data.hist.forEach((h,i)=>{ if(HIST[i]) HIST[i]=h; });
   if(data.monthlyVals) data.monthlyVals.forEach((mv,i)=>{ if(MONTHLY_VALS[i] && mv) Object.assign(MONTHLY_VALS[i], mv); });
   if(data.monthlyNotes) Object.assign(MONTHLY_NOTES, data.monthlyNotes);
+  if(data.refMes) defaultRefMes = data.refMes;
   const el = document.getElementById('last-saved');
   if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
 }

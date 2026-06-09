@@ -955,7 +955,7 @@ function renderAnalysis(){
     <div class="anl-kpi"><div class="anl-kpi-val">${totalH.toFixed(1)}h</div><div class="anl-kpi-lbl">Horas time (total)</div></div>
     <div class="anl-kpi"><div class="anl-kpi-val">${pct(c.taxa)}</div><div class="anl-kpi-lbl">Taxa utilização consult.</div></div>
     <div class="anl-kpi"><div class="anl-kpi-val">${pct(c.clientesAcima80)}</div><div class="anl-kpi-lbl">Clientes ≥80% utilizados</div></div>
-    <div class="anl-kpi"><div class="anl-kpi-val">${c.clientes0h}</div><div class="anl-kpi-lbl">Clientes sem utilização</div></div>
+    <div class="anl-kpi"><div class="anl-kpi-val">${c.clientes0h}</div><div class="anl-kpi-lbl">Com consultoria aberta e 0h no mês</div></div>
   </div>`;
 
   // ── Projetos ──
@@ -1014,7 +1014,7 @@ function renderAnalysis(){
 
   // ── Clientes 0h ──
   html+=`
-    <div class="anl-section-title" style="margin:16px 0 8px;">⚠️ Clientes sem utilização (${data.consultoria.clientes0h.length})</div>
+    <div class="anl-section-title" style="margin:16px 0 8px;">⚠️ Clientes com consultoria aberta no mês, mas sem utilização (${data.consultoria.clientes0h.length})</div>
     <div class="anl-table-wrap">
       <table class="anl-table">
         <thead><tr><th>Cliente</th><th style="text-align:right">HS Contratadas</th><th>Consultor resp.</th></tr></thead>

@@ -1137,7 +1137,7 @@ initNotes();
   const selM = document.getElementById('anl-mes');
   const selA = document.getElementById('anl-ano');
   if(selM && selA){
-    MESES_HIST.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; if(m==='Mai') o.selected=true; selM.appendChild(o); });
+    MN.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; if(m==='Mai') o.selected=true; selM.appendChild(o); });
     ANOS.forEach(a=>{ const o=document.createElement('option'); o.value=a; o.textContent=a; if(a===OKR_YEAR) o.selected=true; selA.appendChild(o); });
   }
 })();

@@ -171,11 +171,28 @@ body{font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-s
 /* ANÁLISE MENSAL */
 .anl-sel-row{display:flex;align-items:center;gap:8px;margin-bottom:var(--gap);background:var(--card);padding:10px 14px;border-radius:var(--radius);box-shadow:var(--shadow-sm);}
 .anl-sel-row label{font-size:11px;font-weight:700;color:var(--text2);}
-.anl-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:14px 16px;}
-.anl-kpi{text-align:center;}
-.anl-kpi-val{font-size:24px;font-weight:800;line-height:1;margin-bottom:3px;}
+/* template banner */
+.anl-template-banner{background:linear-gradient(135deg,var(--charcoal),var(--navy));border-radius:var(--radius);padding:16px 22px;margin-bottom:var(--gap);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 4px 16px rgba(44,55,153,0.18);}
+.anl-tmpl-info{display:flex;align-items:center;gap:12px;}
+.anl-tmpl-icon{font-size:28px;line-height:1;}
+.anl-tmpl-title{color:#fff;font-size:13px;font-weight:700;margin-bottom:3px;}
+.anl-tmpl-sub{color:rgba(255,255,255,0.55);font-size:11px;}
+.btn-tmpl-dl{background:#fff;color:var(--navy);border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s;}
+.btn-tmpl-dl:hover{opacity:.85;}
+/* KPIs */
+.anl-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:var(--gap);}
+.anl-kpi{background:var(--card);border-radius:10px;box-shadow:var(--shadow-sm);padding:14px 16px;text-align:center;border-top:3px solid var(--border);}
+.anl-kpi.kpi-green{border-top-color:var(--green-mid);}
+.anl-kpi.kpi-amber{border-top-color:var(--amber-mid);}
+.anl-kpi.kpi-blue{border-top-color:var(--blue-mid);}
+.anl-kpi.kpi-red{border-top-color:var(--red);}
+.anl-kpi-val{font-size:24px;font-weight:800;line-height:1;margin-bottom:4px;}
 .anl-kpi-lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+/* section cards */
 .anl-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:var(--gap);overflow:hidden;}
+.anl-card.sec-green{border-left:4px solid var(--green-mid);}
+.anl-card.sec-amber{border-left:4px solid var(--amber-mid);}
+.anl-card.sec-blue{border-left:4px solid var(--blue-mid);}
 .anl-card-hdr{padding:13px 18px;border-bottom:1px solid #f0f2f6;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
 .anl-card-title{font-size:13px;font-weight:700;color:var(--text);}
 .anl-table-wrap{overflow-x:auto;}
@@ -374,12 +391,15 @@ body.apresentacao .obj-section { display:block !important; }
       <div id="anl-hist-chips" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
     </div>
   </div>
-  <div id="anl-template-card" style="background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 20px;margin-bottom:var(--gap);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-    <div>
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;">📋 Modelo Padrão — Planilha de Análise Mensal</div>
-      <div style="font-size:11px;color:var(--text2);">Preencha a planilha com os dados do mês e importe diretamente no botão <b>📊 Importar Planilha</b> da barra acima. Aceita <code>.xlsx</code> ou <code>.json</code>.</div>
+  <div class="anl-template-banner">
+    <div class="anl-tmpl-info">
+      <div class="anl-tmpl-icon">📋</div>
+      <div>
+        <div class="anl-tmpl-title">Modelo Padrão — Planilha de Análise Mensal</div>
+        <div class="anl-tmpl-sub">Preencha e importe com o botão <strong style="color:rgba(255,255,255,0.85)">📊 Importar Planilha</strong> na barra acima · Aceita <code style="background:rgba(255,255,255,0.15);padding:1px 5px;border-radius:4px;">.xlsx</code></div>
+      </div>
     </div>
-    <a href="https://raw.githubusercontent.com/cecossi/OKR/main/template_analise_mensal.xlsx" download="template_analise_mensal.xlsx" style="background:var(--navy);color:#fff;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">⬇️ Baixar Modelo</a>
+    <a href="template_analise_mensal.xlsx" download="template_analise_mensal.xlsx" class="btn-tmpl-dl">⬇️ Baixar Modelo</a>
   </div>
   <div id="anl-content"></div>
 </div>
@@ -960,7 +980,12 @@ function renderAnalysis(){
   _renderHistoricoChips();
   const data = MONTHLY_ANALYSIS[key];
   if(!data){
-    el.innerHTML = `<div class="anl-empty">Sem análise registrada para <strong>${key}</strong>.<br>Importe o JSON gerado pela planilha para adicionar este mês ao histórico.</div>`;
+    el.innerHTML = `<div class="anl-empty" style="padding:48px 24px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">📭</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">Sem análise registrada para <strong>${key}</strong></div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:20px;">Baixe o modelo, preencha com os dados do mês e importe pelo botão <strong>📊 Importar Planilha</strong> na barra acima.</div>
+      <a href="template_analise_mensal.xlsx" download="template_analise_mensal.xlsx" style="background:var(--navy);color:#fff;border-radius:20px;padding:9px 22px;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">⬇️ Baixar Modelo da Planilha</a>
+    </div>`;
     return;
   }
   // status para projetos (prazo)
@@ -999,17 +1024,17 @@ function renderAnalysis(){
     </div>
   </div>
   <div class="anl-kpis">
-    <div class="anl-kpi"><div class="anl-kpi-val">${p.total}</div><div class="anl-kpi-lbl">Projetos encerrados</div></div>
-    <div class="anl-kpi"><div class="anl-kpi-val">${p.mediaDias}d</div><div class="anl-kpi-lbl">Média geral (dias)</div></div>
-    <div class="anl-kpi"><div class="anl-kpi-val">${totalH.toFixed(1)}h</div><div class="anl-kpi-lbl">Horas time (total)</div></div>
-    <div class="anl-kpi"><div class="anl-kpi-val">${pct(c.taxa)}</div><div class="anl-kpi-lbl">Taxa utilização consult.</div></div>
-    <div class="anl-kpi"><div class="anl-kpi-val">${pct(c.clientesAcima80)}</div><div class="anl-kpi-lbl">Clientes ≥80% utilizados</div></div>
-    <div class="anl-kpi"><div class="anl-kpi-val">${c.clientes0h}</div><div class="anl-kpi-lbl">Com consultoria aberta e 0h no mês</div></div>
+    <div class="anl-kpi kpi-green"><div class="anl-kpi-val" style="color:var(--green)">${p.total}</div><div class="anl-kpi-lbl">Projetos encerrados</div></div>
+    <div class="anl-kpi kpi-green"><div class="anl-kpi-val" style="color:var(--green)">${p.mediaDias}d</div><div class="anl-kpi-lbl">Média geral (dias)</div></div>
+    <div class="anl-kpi kpi-amber"><div class="anl-kpi-val" style="color:var(--amber)">${totalH.toFixed(1)}h</div><div class="anl-kpi-lbl">Horas time (total)</div></div>
+    <div class="anl-kpi kpi-blue"><div class="anl-kpi-val" style="color:var(--blue)">${pct(c.taxa)}</div><div class="anl-kpi-lbl">Taxa utilização consult.</div></div>
+    <div class="anl-kpi kpi-blue"><div class="anl-kpi-val" style="color:var(--blue)">${pct(c.clientesAcima80)}</div><div class="anl-kpi-lbl">Clientes ≥80% utilizados</div></div>
+    <div class="anl-kpi kpi-red"><div class="anl-kpi-val" style="color:var(--red)">${c.clientes0h}</div><div class="anl-kpi-lbl">Consultoria aberta · 0h no mês</div></div>
   </div>`;
 
   // ── Projetos ──
   html += `
-  <div class="anl-card">
+  <div class="anl-card sec-green">
     <div class="anl-card-hdr">
       <span class="anl-card-title">📦 Projetos encerrados em ${key}</span>
       <span style="font-size:12px;color:var(--text2);">Jornada: ${p.jornada} · Upgrade: ${p.upgrade} · Média Jornada: ${p.mediaJornada}d · Média Upgrade: ${p.mediaUpgrade}d · Meta ${MN[OKR_START_MONTH]}/${ano}: ${p.metaMes}d</span>
@@ -1027,9 +1052,9 @@ function renderAnalysis(){
 
   // ── Horas Time ──
   html += `
-  <div class="anl-card">
+  <div class="anl-card sec-amber">
     <div class="anl-card-hdr">
-      <span class="anl-card-title">👥 Horas Time — ${key}</span>
+      <span class="anl-card-title" style="color:var(--amber)">👥 Horas Time — ${key}</span>
       <span style="font-size:12px;color:var(--text2);">Total: ${totalH.toFixed(1)}h · Capacidade ref: ${h.capacidade}h/pessoa</span>
     </div>
     <div class="anl-table-wrap">
@@ -1046,9 +1071,9 @@ function renderAnalysis(){
 
   // ── Consultoria top clientes ──
   html += `
-  <div class="anl-card">
+  <div class="anl-card sec-blue">
     <div class="anl-card-hdr">
-      <span class="anl-card-title">📈 Consultoria — Top clientes ${key}</span>
+      <span class="anl-card-title" style="color:var(--blue)">📈 Consultoria — Top clientes ${key}</span>
       <span style="font-size:12px;color:var(--text2);">Taxa geral: ${pct(c.taxa)} · Meta ${MN[OKR_START_MONTH]}/${ano}: ${pct(c.metaMes)} · Clientes ≥80%: ${pct(c.clientesAcima80)}</span>
     </div>
     <div class="anl-table-wrap">

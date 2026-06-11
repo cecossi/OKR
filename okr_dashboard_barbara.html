@@ -550,7 +550,7 @@ const KR_IDX_NOTA_CONS = 13; // nota média consultoria
 const KR_CHART_IDXS = new Set([KR_IDX_IMPL, KR_IDX_NPS, KR_IDX_APTO, KR_IDX_CONS, KR_IDX_NOTA_CONS]);
 
 function calcPct(kr){
-  if(kr.type==='bin') return kr.atual*100;
+  if(kr.type==='bin') return kr.atual===1 ? 100 : (kr.status==='ea' ? 50 : 0);
   if(kr.atual===null) return 0;
   if(kr.type==='pct'){
     if(kr.label.includes('taxa de utilização')) return Math.max(0,Math.min(100,Math.round(((kr.atual-47.9)/(80-47.9))*100)));

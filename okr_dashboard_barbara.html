@@ -28,6 +28,35 @@
   --shadow-sm:0 1px 3px rgba(52,55,72,0.08);
   --radius:12px; --gap:16px;
 }
+/* ── DARK MODE ── */
+html[data-theme="dark"]{
+  --bg:#12131f; --card:#1c1e30; --header:#343748;
+  --green:#5faa2e; --green-bg:#162009; --green-mid:#5faa2e;
+  --blue:#6b7de0; --blue-bg:#0f1328; --blue-mid:#6b7de0;
+  --amber:#d48a25; --amber-bg:#261808; --amber-mid:#d48a25;
+  --red:#e05555; --red-bg:#280d0d;
+  --gray:#9097b4; --gray-bg:#1e2030;
+  --text:#dde1f0; --text2:#8892b0; --border:#2c2f4a;
+  --shadow:0 1px 4px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(0,0,0,0.3);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.35);
+}
+html[data-theme="dark"] .anl-table th{background:#171928;}
+html[data-theme="dark"] .anl-table tbody tr:hover td{background:#1e2030;}
+html[data-theme="dark"] .anl-table .row-total td{background:#171928;}
+html[data-theme="dark"] .kr-bar-wrap{background:#252840;}
+html[data-theme="dark"] .tabs{background:#1c1e30;}
+html[data-theme="dark"] .tab:hover:not(.active){background:#252840;color:var(--text);}
+html[data-theme="dark"] .sum-card::before,html[data-theme="dark"] .obj-header::before{opacity:.8;}
+html[data-theme="dark"] .notes-panel,html[data-theme="dark"] .notes-header{background:#1c1e30;border-color:#2c2f4a;}
+html[data-theme="dark"] .save-bar{background:#1c1e30;}
+html[data-theme="dark"] .anl-sel-row{background:#1c1e30;}
+html[data-theme="dark"] .sync-modal{background:#1c1e30;color:var(--text);}
+html[data-theme="dark"] .sync-modal h3{color:var(--text);}
+html[data-theme="dark"] .sync-modal p,html[data-theme="dark"] .sync-modal ol{color:var(--text2);}
+html[data-theme="dark"] .sync-modal input{background:#12131f;border-color:#2c2f4a;color:var(--text);}
+html[data-theme="dark"] .btn-sync-cancel{background:#252840;color:var(--text);}
+html[data-theme="dark"] .hist-entry{background:#12131f;border-color:#2c2f4a;}
+html[data-theme="dark"] select,html[data-theme="dark"] textarea{background:#12131f;border-color:#2c2f4a;color:var(--text);}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
 .wrap{max-width:1200px;margin:0 auto;padding:24px 20px;}
@@ -285,6 +314,7 @@ body.apresentacao .obj-section { display:block !important; }
   </div>
   <div class="header-right">
     <span class="badge-mes" id="badge-mes"></span>
+    <button class="btn-hdr" id="btn-theme" onclick="toggleTheme()" title="Alternar modo claro/escuro">🌙 Modo escuro</button>
     <button class="btn-hdr sync-notoken" id="sync-status" onclick="openSyncModal()">☁️ Configurar sync</button>
     <button class="btn-hdr" id="btn-pres" onclick="toggleApresentacao()">📊 Modo apresentação</button>
     <button class="btn-hdr" onclick="window.print()">🖨️ Imprimir / PDF</button>
@@ -1179,6 +1209,19 @@ function saveData(){
     pushToGitHub();
   } catch(e){ console.warn('Não foi possível salvar:', e); }
 }
+
+// ─── TEMA CLARO / ESCURO ────────────────────────────────────────────────────
+function toggleTheme(){
+  const dark = document.documentElement.dataset.theme === 'dark';
+  _applyTheme(dark ? 'light' : 'dark');
+  localStorage.setItem('okr_theme', dark ? 'light' : 'dark');
+}
+function _applyTheme(t){
+  document.documentElement.dataset.theme = t === 'dark' ? 'dark' : '';
+  const btn = document.getElementById('btn-theme');
+  if(btn) btn.textContent = t === 'dark' ? '☀️ Modo claro' : '🌙 Modo escuro';
+}
+(()=>{ _applyTheme(localStorage.getItem('okr_theme')||'light'); })();
 
 // ─── GITHUB SYNC ────────────────────────────────────────────────────────────
 const GH_OWNER    = 'cecossi';

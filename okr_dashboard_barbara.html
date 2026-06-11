@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
 <style>
 :root {
   /* ── Preâmbulo Brand ── */
@@ -260,7 +261,7 @@ body.apresentacao .obj-section { display:block !important; }
     <button class="btn-link" onclick="copyLink()">🔗 Copiar link</button>
     <button class="btn-exp" onclick="exportData()">⬇️ Exportar JSON</button>
     <label class="btn-imp" style="cursor:pointer">⬆️ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
-    <label class="btn-imp" style="cursor:pointer;background:#2C3799;">📥 Análise Mensal<input type="file" accept=".json" style="display:none" onchange="importAnalysis(event)"></label>
+    <label class="btn-imp" style="cursor:pointer;background:#2C3799;">📊 Importar Planilha<input type="file" accept=".xlsx,.json" style="display:none" onchange="importAnalysisFile(event)"></label>
     <button class="btn-clr" onclick="clearData()">🗑️ Limpar dados</button>
   </span>
 </div>
@@ -372,6 +373,13 @@ body.apresentacao .obj-section { display:block !important; }
       <span style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;">Histórico disponível:</span>
       <div id="anl-hist-chips" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
     </div>
+  </div>
+  <div id="anl-template-card" style="background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 20px;margin-bottom:var(--gap);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;">📋 Modelo Padrão — Planilha de Análise Mensal</div>
+      <div style="font-size:11px;color:var(--text2);">Preencha a planilha com os dados do mês e importe diretamente no botão <b>📊 Importar Planilha</b> da barra acima. Aceita <code>.xlsx</code> ou <code>.json</code>.</div>
+    </div>
+    <a href="https://raw.githubusercontent.com/cecossi/OKR/main/template_analise_mensal.xlsx" download="template_analise_mensal.xlsx" style="background:var(--navy);color:#fff;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">⬇️ Baixar Modelo</a>
   </div>
   <div id="anl-content"></div>
 </div>
@@ -1187,6 +1195,130 @@ function loadSavedAnalyses(){
     const raw = localStorage.getItem(ANALYSIS_STORAGE_KEY);
     if(raw) Object.assign(MONTHLY_ANALYSIS, JSON.parse(raw));
   } catch(e){ console.warn('Erro ao carregar análises salvas:', e); }
+}
+
+function importAnalysisFile(event){
+  const file = (event.target.files||[])[0];
+  if(!file) return;
+  if(file.name.endsWith('.xlsx')) importAnalysisXLSX(event);
+  else importAnalysis(event);
+}
+
+function importAnalysisXLSX(event){
+  const file = (event.target.files||[])[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      if(!window.XLSX) throw new Error('Biblioteca XLSX não carregada. Verifique conexão com internet.');
+      const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+      const data = parseXLSXToAnalysis(wb);
+      const chaves = Object.keys(data);
+      Object.assign(MONTHLY_ANALYSIS, data);
+      try {
+        const saved = JSON.parse(localStorage.getItem(ANALYSIS_STORAGE_KEY)||'{}');
+        Object.assign(saved, data);
+        localStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(saved));
+      } catch(e2){ console.warn('Não foi possível persistir análise:', e2); }
+      const selM = document.getElementById('anl-mes');
+      const selA = document.getElementById('anl-ano');
+      if(selM && chaves[0]){
+        const [m,a] = chaves[0].split('/');
+        selM.value = m;
+        if(selA) selA.value = a;
+      }
+      renderAnalysis();
+      alert('✅ Planilha importada com sucesso!\nPeríodo: '+chaves.join(', '));
+    } catch(err){ alert('Erro ao importar planilha:\n'+err.message); }
+    event.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseXLSXToAnalysis(wb){
+  function gc(ws,r,c){ return ws[XLSX.utils.encode_cell({r:r-1,c:c-1})]; }
+  function gs(ws,r,c){ const cl=gc(ws,r,c); return cl ? String(cl.v).trim() : ''; }
+  function gn(ws,r,c,def=null){ const cl=gc(ws,r,c); if(!cl||cl.v==null) return def; const n=parseFloat(cl.v); return isNaN(n)?def:n; }
+
+  const cfg = wb.Sheets['CONFIG'];
+  if(!cfg) throw new Error('Aba CONFIG não encontrada. Verifique se está usando o modelo correto.');
+  const mes     = gs(cfg,4,2);
+  const ano     = Math.round(gn(cfg,5,2) || new Date().getFullYear());
+  const fonte_p = gs(cfg,6,2);
+  const fonte_h = gs(cfg,7,2);
+  const fonte_c = gs(cfg,8,2);
+  const hs_vend = gn(cfg,9,2,0);
+  const meta_c  = gn(cfg,10,2,0);
+  const meta_p  = gn(cfg,11,2,0);
+  if(!mes) throw new Error('Mês não encontrado na célula B4 da aba CONFIG.');
+  const chave = `${mes}/${ano}`;
+
+  // PROJETOS
+  const ws_p = wb.Sheets['PROJETOS'];
+  const lista_p = [];
+  for(let r=4;r<=23;r++){
+    const cliente = gs(ws_p,r,1); if(!cliente) continue;
+    const resp = gs(ws_p,r,2);
+    const encC = gc(ws_p,r,3);
+    let enc = encC ? (encC.w||String(encC.v)).trim() : '';
+    const tipo = gs(ws_p,r,4).toUpperCase();
+    const dias = gn(ws_p,r,5);
+    const st   = gs(ws_p,r,6).toLowerCase()||'warn';
+    lista_p.push({cliente,resp,enc,dias:dias?Math.round(dias):0,tipo,st});
+  }
+  const med = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10 : 0;
+  const resumo_p = {
+    total:lista_p.length,
+    jornada:lista_p.filter(p=>p.tipo==='JORNADA').length,
+    upgrade:lista_p.filter(p=>p.tipo==='UPGRADE').length,
+    mediaDias:  med(lista_p.filter(p=>p.dias).map(p=>p.dias)),
+    mediaJornada:med(lista_p.filter(p=>p.tipo==='JORNADA'&&p.dias).map(p=>p.dias)),
+    mediaUpgrade:med(lista_p.filter(p=>p.tipo==='UPGRADE'&&p.dias).map(p=>p.dias)),
+    metaMes:meta_p
+  };
+
+  // HORAS TIME
+  const ws_h = wb.Sheets['HORAS_TIME'];
+  const capacidade = gn(ws_h,2,2,128);
+  const lista_h = [];
+  for(let r=4;r<=18;r++){
+    const colab=gs(ws_h,r,1); if(!colab) continue;
+    const horas=gn(ws_h,r,2,0); const obs=gs(ws_h,r,4);
+    lista_h.push({colab,horas,obs});
+  }
+  const tot_h = lista_h.reduce((a,x)=>a+x.horas,0);
+  lista_h.forEach(x=>{ x.pct=tot_h?Math.round(x.horas/tot_h*1000)/1000:0; });
+
+  // CONSULTORIA
+  const ws_c = wb.Sheets['CONSULTORIA'];
+  const top_clientes = [];
+  for(let r=4;r<=33;r++){
+    const cliente=gs(ws_c,r,1); if(!cliente) continue;
+    const hsExec=gn(ws_c,r,2,0);
+    let taxa=gn(ws_c,r,3);
+    const consultor=gs(ws_c,r,4);
+    const st=gs(ws_c,r,5).toLowerCase()||'warn';
+    if(taxa!==null) taxa=taxa>5?taxa/100:taxa;
+    top_clientes.push({cliente,hsExec,taxa,consultor,st});
+  }
+  const clientes_0h = [];
+  for(let r=37;r<=46;r++){
+    const cliente=gs(ws_c,r,1); if(!cliente) continue;
+    const hsCont=Math.round(gn(ws_c,r,2,0));
+    const consultor=gs(ws_c,r,3);
+    clientes_0h.push({cliente,hsCont,consultor});
+  }
+  const tot_exec = top_clientes.reduce((a,x)=>a+(x.hsExec||0),0);
+  const taxa_geral = hs_vend?Math.round(tot_exec/hs_vend*1000)/1000:0;
+  const cli_acima  = top_clientes.filter(x=>x.taxa!==null&&x.taxa>=0.8).length;
+  const pct_acima  = top_clientes.length?Math.round(cli_acima/top_clientes.length*1000)/1000:0;
+  const metaMesC   = meta_c>1?Math.round(meta_c/100*1000)/1000:meta_c;
+
+  return { [chave]: {
+    projetos:   {fonte:fonte_p, resumo:resumo_p, lista:lista_p},
+    horasTime:  {fonte:fonte_h, capacidade:Math.round(capacidade), lista:lista_h},
+    consultoria:{fonte:fonte_c, resumo:{taxa:taxa_geral,metaMes:metaMesC,clientesAcima80:pct_acima,clientes0h:clientes_0h.length}, topClientes:top_clientes, clientes0h:clientes_0h}
+  }};
 }
 
 function importAnalysis(event){

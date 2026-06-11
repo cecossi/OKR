@@ -42,6 +42,24 @@ body{font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-s
 .badge-mes{background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;letter-spacing:.2px;}
 .btn-hdr{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;letter-spacing:.1px;}
 .btn-hdr:hover{background:rgba(255,255,255,0.2);}
+.sync-ok{background:rgba(50,200,100,0.25);border-color:rgba(50,200,100,0.5);color:#a8f0c0;}
+.sync-syncing{background:rgba(255,200,0,0.2);border-color:rgba(255,200,0,0.4);color:#ffe066;}
+.sync-error{background:rgba(220,50,50,0.25);border-color:rgba(220,50,50,0.5);color:#ffaaaa;}
+.sync-offline{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.45);}
+.sync-notoken{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);border-style:dashed;}
+/* Modal sync */
+.sync-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;}
+.sync-modal{background:#fff;border-radius:16px;padding:28px 32px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.sync-modal h3{font-size:16px;font-weight:800;color:var(--charcoal);margin-bottom:6px;}
+.sync-modal p{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6;}
+.sync-modal ol{font-size:12px;color:var(--text2);padding-left:18px;margin-bottom:16px;line-height:2;}
+.sync-modal ol a{color:var(--navy);font-weight:700;}
+.sync-modal input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;font-family:monospace;margin-bottom:14px;outline:none;}
+.sync-modal input:focus{border-color:var(--navy);}
+.sync-modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+.btn-sync-save{background:var(--navy);color:#fff;border:none;border-radius:20px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-sync-cancel{background:var(--light-gray);color:var(--text);border:none;border-radius:20px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-sync-remove{background:var(--red-bg);color:var(--red);border:none;border-radius:20px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;}
 .btn-hdr.active-pres{background:rgba(255,200,0,0.22);border-color:rgba(255,200,0,0.55);color:#ffe066;}
 
 /* SUMÁRIO */
@@ -267,6 +285,7 @@ body.apresentacao .obj-section { display:block !important; }
   </div>
   <div class="header-right">
     <span class="badge-mes" id="badge-mes"></span>
+    <button class="btn-hdr sync-notoken" id="sync-status" onclick="openSyncModal()">☁️ Configurar sync</button>
     <button class="btn-hdr" id="btn-pres" onclick="toggleApresentacao()">📊 Modo apresentação</button>
     <button class="btn-hdr" onclick="window.print()">🖨️ Imprimir / PDF</button>
   </div>
@@ -402,6 +421,26 @@ body.apresentacao .obj-section { display:block !important; }
     <a href="template_analise_mensal.xlsx" download="template_analise_mensal.xlsx" class="btn-tmpl-dl">⬇️ Baixar Modelo</a>
   </div>
   <div id="anl-content"></div>
+</div>
+
+<!-- Modal Sync GitHub -->
+<div class="sync-modal-overlay" id="sync-modal" onclick="if(event.target===this)closeSyncModal()">
+  <div class="sync-modal">
+    <h3>☁️ Sync automático entre dispositivos</h3>
+    <p>Os dados ficam salvos no GitHub e qualquer dispositivo que abrir o dashboard carrega a versão mais recente automaticamente.<br><strong>Leitura é automática (sem token). Token necessário apenas para salvar.</strong></p>
+    <ol>
+      <li>Acesse <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a></li>
+      <li>Note: <code>OKR Dashboard sync</code> · Expiration: <code>No expiration</code></li>
+      <li>Marque <strong>public_repo</strong> em Scopes</li>
+      <li>Clique <strong>Generate token</strong> e cole abaixo</li>
+    </ol>
+    <input type="password" id="sync-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="sync-modal-btns">
+      <button class="btn-sync-remove" onclick="removeSyncToken()" id="btn-remove-token" style="display:none">🗑️ Remover token</button>
+      <button class="btn-sync-cancel" onclick="closeSyncModal()">Cancelar</button>
+      <button class="btn-sync-save" onclick="saveSyncToken()">✅ Salvar e sincronizar</button>
+    </div>
+  </div>
 </div>
 
 <div class="footer">
@@ -1137,7 +1176,99 @@ function saveData(){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(_buildPayload()));
     const el = document.getElementById('last-saved');
     if(el) el.textContent = new Date().toLocaleString('pt-BR');
+    pushToGitHub();
   } catch(e){ console.warn('Não foi possível salvar:', e); }
+}
+
+// ─── GITHUB SYNC ────────────────────────────────────────────────────────────
+const GH_OWNER    = 'cecossi';
+const GH_REPO     = 'OKR';
+const GH_PATH     = 'data/okr-data.json';
+const GH_TOKEN_KEY= 'okr_gh_token';
+
+function ghToken(){ return localStorage.getItem(GH_TOKEN_KEY)||''; }
+
+function setSyncStatus(st){
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  const cfg = {
+    ok:      ['☁️ Sincronizado',       'btn-hdr sync-ok'],
+    syncing: ['🔄 Sincronizando...',   'btn-hdr sync-syncing'],
+    error:   ['⚠️ Erro ao sincronizar','btn-hdr sync-error'],
+    offline: ['📴 Sem acesso',         'btn-hdr sync-offline'],
+    notoken: ['☁️ Configurar sync',    'btn-hdr sync-notoken']
+  };
+  const [txt, cls] = cfg[st] || cfg.notoken;
+  el.textContent = txt;
+  el.className = cls;
+}
+
+async function pushToGitHub(){
+  const token = ghToken();
+  if(!token){ setSyncStatus('notoken'); return; }
+  setSyncStatus('syncing');
+  try {
+    const payload = { savedAt: new Date().toISOString(), data: _buildPayload(), analyses: JSON.parse(JSON.stringify(MONTHLY_ANALYSIS)) };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    let sha = null;
+    try {
+      const r = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`,
+        { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } });
+      if(r.ok){ sha = (await r.json()).sha; }
+    } catch(e){}
+    const body = { message: `OKR sync ${new Date().toISOString()}`, content, branch: 'main' };
+    if(sha) body.sha = sha;
+    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error(`${res.status}`);
+    setSyncStatus('ok');
+  } catch(e){ console.warn('Sync GitHub falhou:', e); setSyncStatus('error'); }
+}
+
+async function pullFromGitHub(){
+  try {
+    const res = await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}?t=${Date.now()}`);
+    if(!res.ok){ setSyncStatus(ghToken()?'offline':'notoken'); return false; }
+    const remote = await res.json();
+    const localRaw = localStorage.getItem(STORAGE_KEY);
+    if(localRaw){
+      const local = JSON.parse(localRaw);
+      if(local.savedAt && remote.savedAt && local.savedAt >= remote.savedAt){ setSyncStatus('ok'); return false; }
+    }
+    if(remote.data){ _applyData(remote.data); localStorage.setItem(STORAGE_KEY, JSON.stringify(remote.data)); }
+    if(remote.analyses){ Object.assign(MONTHLY_ANALYSIS, remote.analyses); localStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(remote.analyses)); }
+    setSyncStatus('ok');
+    return true;
+  } catch(e){ setSyncStatus(ghToken()?'offline':'notoken'); return false; }
+}
+
+async function initSync(){
+  const updated = await pullFromGitHub();
+  if(updated){ renderKRs(); updateCharts(); loadNotesMes(); updateNotesCount(); _renderHistoricoChips(); }
+  else if(!ghToken()) setSyncStatus('notoken');
+}
+
+function openSyncModal(){
+  const t = ghToken();
+  document.getElementById('sync-token-input').value = t;
+  document.getElementById('btn-remove-token').style.display = t ? 'block' : 'none';
+  document.getElementById('sync-modal').style.display = 'flex';
+}
+function closeSyncModal(){ document.getElementById('sync-modal').style.display = 'none'; }
+async function saveSyncToken(){
+  const t = document.getElementById('sync-token-input').value.trim();
+  if(!t){ removeSyncToken(); return; }
+  localStorage.setItem(GH_TOKEN_KEY, t);
+  closeSyncModal();
+  await pushToGitHub();
+}
+function removeSyncToken(){
+  localStorage.removeItem(GH_TOKEN_KEY);
+  closeSyncModal();
+  setSyncStatus('notoken');
 }
 
 // Encode/decode seguro para Unicode (substitui btoa/unescape deprecated)
@@ -1407,6 +1538,7 @@ loadSavedAnalyses();
 renderKRs();
 buildCharts();
 initNotes();
+initSync(); // puxa dados do GitHub em background, atualiza se houver versão mais nova
 // ── Seletores Análise Mensal ──
 (()=>{
   const selM = document.getElementById('anl-mes');

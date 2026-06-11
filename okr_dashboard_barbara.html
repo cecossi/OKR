@@ -634,7 +634,7 @@ function renderKRs(){
       <div class="kr-card" id="krc-${i}" style="animation-delay:${(i%4)*0.05}s">
         <div class="kr-card-top">
           <div class="kr-top-row">
-            <div class="kr-label">${kr.label}</div>
+            <div class="kr-label"><span style="color:var(--text2);font-weight:700;margin-right:6px;">KR${i+1}</span>${kr.label}</div>
             <div class="kr-pct-block">
               <div class="kr-pct c-${kr.cor}" id="pct-${i}">${pct}%</div>
             </div>

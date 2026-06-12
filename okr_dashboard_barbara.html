@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
 <style>
@@ -28,6 +29,13 @@
   --shadow-sm:0 1px 3px rgba(52,55,72,0.08);
   --radius:12px; --gap:16px;
 }
+/* ── AUTH OVERLAY ── */
+#auth-overlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#343748 0%,#2C3799 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
+#auth-overlay img{height:52px;margin-bottom:8px;}
+#auth-overlay h2{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.3px;font-family:'Montserrat',sans-serif;}
+#auth-overlay p{color:rgba(255,255,255,0.6);font-size:13px;text-align:center;}
+#auth-overlay .btn-login{background:#fff;color:#2C3799;border:none;border-radius:24px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:opacity .15s;}
+#auth-overlay .btn-login:hover{opacity:.88;}
 /* ── DARK MODE ── */
 html[data-theme="dark"]{
   --bg:#12131f; --card:#1c1e30; --header:#343748;
@@ -312,6 +320,15 @@ body.apresentacao .obj-section { display:block !important; }
 </style>
 </head>
 <body>
+
+<!-- AUTH OVERLAY — aparece até o login ser confirmado -->
+<div id="auth-overlay">
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎯%3C/text%3E%3C/svg%3E" alt="">
+  <h2>OKRs 2026 — Preâmbulo Tech</h2>
+  <p>Acesso restrito · Faça login com seu convite</p>
+  <button class="btn-login" onclick="netlifyIdentity.open('login')">Entrar</button>
+</div>
+
 <div class="wrap">
 
 <div class="header">
@@ -324,6 +341,7 @@ body.apresentacao .obj-section { display:block !important; }
   </div>
   <div class="header-right">
     <span class="badge-mes" id="badge-mes"></span>
+    <button class="btn-hdr" id="btn-logout" onclick="netlifyIdentity.logout()" style="display:none">🚪 Sair</button>
     <button class="btn-hdr" id="btn-theme" onclick="toggleTheme()" title="Alternar modo claro/escuro">🌙 Modo escuro</button>
     <button class="btn-hdr sync-notoken" id="sync-status" onclick="openSyncModal()">☁️ Configurar sync</button>
     <button class="btn-hdr" id="btn-pres" onclick="toggleApresentacao()">📊 Modo apresentação</button>
@@ -1232,6 +1250,33 @@ function _applyTheme(t){
   if(btn) btn.textContent = t === 'dark' ? '☀️ Modo claro' : '🌙 Modo escuro';
 }
 (()=>{ _applyTheme(localStorage.getItem('okr_theme')||'light'); })();
+
+// ─── NETLIFY IDENTITY AUTH ──────────────────────────────────────────────────
+(function(){
+  const overlay = document.getElementById('auth-overlay');
+  const btnLogout = document.getElementById('btn-logout');
+
+  function onUser(user){
+    if(user){
+      overlay.style.display = 'none';
+      if(btnLogout) btnLogout.style.display = 'block';
+    } else {
+      overlay.style.display = 'flex';
+      if(btnLogout) btnLogout.style.display = 'none';
+      // só abre modal de login se estiver no Netlify (tem netlifyIdentity)
+      if(window.netlifyIdentity) netlifyIdentity.open('login');
+    }
+  }
+
+  if(window.netlifyIdentity){
+    netlifyIdentity.on('init',  user => onUser(user));
+    netlifyIdentity.on('login', user => { netlifyIdentity.close(); onUser(user); });
+    netlifyIdentity.on('logout',()  => onUser(null));
+  } else {
+    // fora do Netlify (GitHub Pages / local) — sem proteção
+    if(overlay) overlay.style.display = 'none';
+  }
+})();
 
 // ─── GITHUB SYNC ────────────────────────────────────────────────────────────
 const GH_OWNER    = 'cecossi';

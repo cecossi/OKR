@@ -21,7 +21,18 @@ Write-Host ""
 
 # 1. Git
 Write-Host "1/3  Git — preparando commit..." -ForegroundColor Yellow
+
+# Se houver um export de dados na pasta raiz, copia para data/ antes de commitar
+$exportSrc = Join-Path $dir "okr-export.json"
+$exportDst = Join-Path $dir "data\okr-data.json"
+if (Test-Path $exportSrc) {
+    Write-Host "     Export encontrado — atualizando data/okr-data.json..." -ForegroundColor Cyan
+    Copy-Item $exportSrc $exportDst -Force
+    Remove-Item $exportSrc
+}
+
 git add okr_dashboard_barbara.html index.html template_analise_mensal.xlsx 2>$null
+git add "data/okr-data.json" 2>$null
 git add -u 2>$null
 
 $status = git status --porcelain

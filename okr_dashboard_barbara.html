@@ -362,7 +362,6 @@ body.apresentacao .obj-section { display:block !important; }
     <button class="btn-exp" onclick="exportData()">⬇️ Exportar JSON</button>
     <label class="btn-imp" style="cursor:pointer">⬆️ Importar JSON<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
     <label class="btn-imp" style="cursor:pointer;background:#2C3799;">📊 Importar Planilha<input type="file" accept=".xlsx,.json" style="display:none" onchange="importAnalysisFile(event)"></label>
-    <button class="btn-clr" onclick="clearData()">🗑️ Limpar dados</button>
   </span>
 </div>
 
@@ -504,6 +503,9 @@ body.apresentacao .obj-section { display:block !important; }
       <button class="btn-sync-cancel" onclick="closeSyncModal()">Cancelar</button>
       <button class="btn-sync-save" onclick="saveSyncToken()">✅ Salvar e sincronizar</button>
     </div>
+    <hr style="margin:20px 0;border:none;border-top:1px solid var(--border);">
+    <p style="font-size:11px;color:#c0392b;font-weight:700;margin-bottom:8px;">⚠️ Zona de perigo</p>
+    <button onclick="clearData()" style="background:#fff0f0;color:#c0392b;border:1.5px solid #f5b7b1;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;width:100%;">🗑️ Limpar todos os dados do dashboard</button>
   </div>
 </div>
 

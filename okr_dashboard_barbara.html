@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
 <style>
@@ -30,14 +29,16 @@
   --radius:12px; --gap:16px;
 }
 /* ── AUTH OVERLAY ── */
-#auth-overlay{position:fixed;inset:0;z-index:9000;background:linear-gradient(135deg,#343748 0%,#2C3799 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
-#auth-overlay img{height:52px;margin-bottom:8px;}
-#auth-overlay h2{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.3px;font-family:'Montserrat',sans-serif;}
-#auth-overlay p{color:rgba(255,255,255,0.6);font-size:13px;text-align:center;}
-#auth-overlay .btn-login{background:#fff;color:#2C3799;border:none;border-radius:24px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:opacity .15s;}
+#auth-overlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#343748 0%,#2C3799 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+#auth-overlay img{height:52px;margin-bottom:4px;}
+#auth-overlay h2{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.3px;font-family:'Montserrat',sans-serif;margin:0;}
+#auth-overlay p{color:rgba(255,255,255,0.6);font-size:13px;text-align:center;margin:0;}
+#auth-inp{background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.3);border-radius:12px;color:#fff;font-size:15px;padding:12px 20px;width:260px;outline:none;font-family:'Montserrat',sans-serif;text-align:center;letter-spacing:2px;}
+#auth-inp::placeholder{color:rgba(255,255,255,0.4);letter-spacing:0;}
+#auth-inp:focus{border-color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.18);}
+#auth-erro{color:#ffb3b3;font-size:12px;display:none;margin-top:-8px;}
+#auth-overlay .btn-login{background:#fff;color:#2C3799;border:none;border-radius:24px;padding:12px 40px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:opacity .15s;}
 #auth-overlay .btn-login:hover{opacity:.88;}
-/* garante que modal do Identity aparece acima do overlay */
-[data-netlify-identity-menu],[class*="netlify-identity"]{z-index:99999!important;}
 /* ── DARK MODE ── */
 html[data-theme="dark"]{
   --bg:#12131f; --card:#1c1e30; --header:#343748;
@@ -323,11 +324,14 @@ body.apresentacao .obj-section { display:block !important; }
 </head>
 <body>
 
-<!-- AUTH OVERLAY — aparece até o login ser confirmado -->
+<!-- AUTH OVERLAY -->
 <div id="auth-overlay">
   <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎯%3C/text%3E%3C/svg%3E" alt="">
   <h2>OKRs 2026 — Preâmbulo Tech</h2>
-  <p>Acesso restrito · Faça login com seu convite</p>
+  <p>Acesso restrito · Digite o código de acesso</p>
+  <input id="auth-inp" type="password" placeholder="código de acesso" autocomplete="off"
+    onkeydown="if(event.key==='Enter') doLogin()">
+  <span id="auth-erro">Código incorreto. Tente novamente.</span>
   <button class="btn-login" onclick="doLogin()">Entrar</button>
 </div>
 
@@ -343,7 +347,7 @@ body.apresentacao .obj-section { display:block !important; }
   </div>
   <div class="header-right">
     <span class="badge-mes" id="badge-mes"></span>
-    <button class="btn-hdr" id="btn-logout" onclick="netlifyIdentity.logout()" style="display:none">🚪 Sair</button>
+    <button class="btn-hdr" id="btn-logout" style="display:none">🚪 Sair</button>
     <button class="btn-hdr" id="btn-theme" onclick="toggleTheme()" title="Alternar modo claro/escuro">🌙 Modo escuro</button>
     <button class="btn-hdr sync-notoken" id="sync-status" onclick="openSyncModal()">☁️ Configurar sync</button>
     <button class="btn-hdr" id="btn-pres" onclick="toggleApresentacao()">📊 Modo apresentação</button>
@@ -1253,30 +1257,39 @@ function _applyTheme(t){
 }
 (()=>{ _applyTheme(localStorage.getItem('okr_theme')||'light'); })();
 
-// ─── NETLIFY IDENTITY AUTH ──────────────────────────────────────────────────
+// ─── AUTH POR CÓDIGO DE ACESSO ──────────────────────────────────────────────
 (function(){
+  const CODIGO = 'preambulo2026';
+  const CHAVE  = 'okr_auth_v1';
   const overlay = document.getElementById('auth-overlay');
   const btnLogout = document.getElementById('btn-logout');
 
-  function showOverlay(){ overlay.style.display = 'flex'; if(btnLogout) btnLogout.style.display = 'none'; }
-  function hideOverlay(){ overlay.style.display = 'none'; if(btnLogout) btnLogout.style.display = 'block'; }
+  function liberar(){
+    overlay.style.display = 'none';
+    if(btnLogout) btnLogout.style.display = 'block';
+  }
 
-  // expõe para o botão "Entrar"
+  // já autenticado neste dispositivo?
+  if(localStorage.getItem(CHAVE) === '1') { liberar(); return; }
+
   window.doLogin = function(){
-    if(!window.netlifyIdentity){ return; }
-    overlay.style.display = 'none'; // esconde overlay para o modal aparecer na frente
-    netlifyIdentity.open('login');
+    const val = (document.getElementById('auth-inp').value || '').trim();
+    if(val === CODIGO){
+      localStorage.setItem(CHAVE, '1');
+      liberar();
+    } else {
+      document.getElementById('auth-erro').style.display = 'block';
+      document.getElementById('auth-inp').value = '';
+      document.getElementById('auth-inp').focus();
+    }
   };
 
-  if(window.netlifyIdentity){
-    netlifyIdentity.on('init',  user => { if(user) hideOverlay(); else showOverlay(); });
-    netlifyIdentity.on('login', user => { netlifyIdentity.close(); hideOverlay(); });
-    netlifyIdentity.on('logout',()  => showOverlay());
-    // se fechar sem logar, volta a mostrar o overlay
-    netlifyIdentity.on('close', ()  => { if(!netlifyIdentity.currentUser()) showOverlay(); });
-  } else {
-    // fora do Netlify (GitHub Pages / local) — sem proteção
-    if(overlay) overlay.style.display = 'none';
+  // logout
+  if(btnLogout){
+    btnLogout.onclick = function(){
+      localStorage.removeItem(CHAVE);
+      location.reload();
+    };
   }
 })();
 

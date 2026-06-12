@@ -30,12 +30,14 @@
   --radius:12px; --gap:16px;
 }
 /* ── AUTH OVERLAY ── */
-#auth-overlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#343748 0%,#2C3799 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
+#auth-overlay{position:fixed;inset:0;z-index:9000;background:linear-gradient(135deg,#343748 0%,#2C3799 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
 #auth-overlay img{height:52px;margin-bottom:8px;}
 #auth-overlay h2{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.3px;font-family:'Montserrat',sans-serif;}
 #auth-overlay p{color:rgba(255,255,255,0.6);font-size:13px;text-align:center;}
 #auth-overlay .btn-login{background:#fff;color:#2C3799;border:none;border-radius:24px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:opacity .15s;}
 #auth-overlay .btn-login:hover{opacity:.88;}
+/* garante que modal do Identity aparece acima do overlay */
+[data-netlify-identity-menu],[class*="netlify-identity"]{z-index:99999!important;}
 /* ── DARK MODE ── */
 html[data-theme="dark"]{
   --bg:#12131f; --card:#1c1e30; --header:#343748;
@@ -1263,8 +1265,7 @@ function _applyTheme(t){
     } else {
       overlay.style.display = 'flex';
       if(btnLogout) btnLogout.style.display = 'none';
-      // só abre modal de login se estiver no Netlify (tem netlifyIdentity)
-      if(window.netlifyIdentity) netlifyIdentity.open('login');
+      // não abre automaticamente — deixa o widget processar o token do convite primeiro
     }
   }
 

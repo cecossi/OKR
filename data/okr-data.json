@@ -1,45 +1,13 @@
 {
-  "savedAt": "2026-05-31T23:59:59Z",
+  "savedAt": "2026-06-12T00:00:00Z",
   "data": {
-    "savedAt": "2026-05-31T23:59:59Z",
+    "savedAt": "2026-06-12T00:00:00Z",
     "version": 3,
-    "refMes": "Mai/2026",
-    "krs": [
-      {"atual": 64.5,  "status": "at"},
-      {"atual": null,  "status": "ni"},
-      {"atual": 0,     "status": "ni"},
-      {"atual": 0,     "status": "ea"},
-      {"atual": 0,     "status": "ni"},
-      {"atual": null,  "status": "ni"},
-      {"atual": 0,     "status": "ni"},
-      {"atual": null,  "status": "ni"},
-      {"atual": null,  "status": "ni"},
-      {"atual": 42.28, "status": "at"},
-      {"atual": 34.57, "status": "ea"},
-      {"atual": 25,    "status": "ea"},
-      {"atual": 0,     "status": "ni"},
-      {"atual": null,  "status": "ni"}
-    ],
-    "hist": [[], [], [], [], [], [], [], [], [], [], [], [], [], []],
-    "monthlyVals": [
-      {"Mai/2026": 64.5},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {"Mai/2026": 42.28},
-      {"Mai/2026": 34.57},
-      {},
-      {},
-      {}
-    ],
-    "monthlyNotes": {
-      "Jun/2026": "Contexto Maio/2026 (baseline de entrada no período OKR):\n• KR1 — Prazo: 8 projetos fechados. Média geral 68,6d | Jornada 64,5d | Upgrade 72,8d. Meta jun/26: 39,6d. Clientes acima da meta: Coutinho (96d), Roberlei (78d), Guimarães (73d), Bernert (164d).\n• KR3 — Checklist migração: não implantado. Necessário antes dos próximos go lives.\n• KR10 — Utilização consultoria: 42,3% (baseline era 47,9%). 4 clientes sem uso: Higino Sordi, GAW Advogados, G.E.S. Toporoski, BBB → ação proativa necessária.\n• KR11 — 34,6% dos clientes usam ≥80% das horas contratadas (meta: 70%).\n• KR12 — 4 clientes identificados com 0h no mês.\nFonte: Planilha \"Maio de 2026.xlsx\" · Hydra · Projetos Jornada CPJ-3C."
-    }
+    "refMes": "Jun/2026",
+    "krs": [],
+    "hist": [],
+    "monthlyVals": [],
+    "monthlyNotes": {}
   },
   "analyses": {}
 }

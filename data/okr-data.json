@@ -1,7 +1,7 @@
 {
-  "savedAt": "2026-06-12T18:16:54.033Z",
+  "savedAt": "2026-06-19T13:20:16.237Z",
   "data": {
-    "savedAt": "2026-06-12T18:16:54.033Z",
+    "savedAt": "2026-06-19T13:20:16.237Z",
     "version": 3,
     "refMes": "Mai/2026",
     "krs": [
@@ -70,6 +70,11 @@
       [],
       [],
       [
+        {
+          "semana": "Semana 25 · 19/Jun/2026",
+          "acoes": "Implementado em 19/06/2026. Primeiro cliente com o registro: 46966 - R. C. MELO SOCIEDADE INDIVIDUAL DE ADVOCACIA",
+          "proximos": "Permanecer realizando a utilização e automatizar o envio para os canais de CS, comercial e HD."
+        },
         {
           "semana": "Semana 24 · 11/Jun/2026",
           "acoes": "",

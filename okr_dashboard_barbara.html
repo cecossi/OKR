@@ -481,20 +481,6 @@ body.apresentacao .obj-section { display:block !important; }
   </div>
 </div>
 
-<!-- SATISFAÇÃO GO-LIVE -->
-<div class="obj-section" id="obj4">
-  <div class="obj-header c2">
-    <div class="obj-icon">📋</div>
-    <div>
-      <div class="obj-title">Satisfação no Go-Live — KR6</div>
-      <div class="obj-sub">Meta: nota mínima 8,0 · Métrica: média das âncoras de satisfação geral</div>
-    </div>
-  </div>
-  <div id="sat-content">
-    <div class="sat-vazio">Carregando dados...</div>
-  </div>
-</div>
-
 <!-- ANÁLISE MENSAL -->
 <div class="obj-section" id="obj3">
   <div class="obj-header" style="background:linear-gradient(135deg,#1a1a2e,#2d2d4e);">
@@ -524,6 +510,20 @@ body.apresentacao .obj-section { display:block !important; }
     <a href="template_analise_mensal.xlsx" download="template_analise_mensal.xlsx" class="btn-tmpl-dl">⬇️ Baixar Modelo</a>
   </div>
   <div id="anl-content"></div>
+</div>
+
+<!-- SATISFAÇÃO GO-LIVE -->
+<div class="obj-section" id="obj4">
+  <div class="obj-header c2">
+    <div class="obj-icon">📋</div>
+    <div>
+      <div class="obj-title">Satisfação no Go-Live — KR6</div>
+      <div class="obj-sub">Meta: nota mínima 8,0 · Métrica: média das âncoras de satisfação geral</div>
+    </div>
+  </div>
+  <div id="sat-content">
+    <div class="sat-vazio">Carregando dados...</div>
+  </div>
 </div>
 
 <!-- Modal Sync GitHub -->
@@ -1101,6 +1101,8 @@ function _mediaBloco(respostas,bloco){
   return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10:null;
 }
 
+function _esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 function renderSatisfacao(){
   const el=document.getElementById('sat-content');
   const rs=SATISFACAO_RESPOSTAS;
@@ -1110,7 +1112,7 @@ function renderSatisfacao(){
   }
   const ancora_vals=rs.map(r=>r.ancora).filter(v=>typeof v==='number');
   const media=ancora_vals.length?Math.round(ancora_vals.reduce((a,b)=>a+b,0)/ancora_vals.length*10)/10:null;
-  const acao=rs.filter(r=>r.ancora<8).length;
+  const acao=rs.filter(r=>typeof r.ancora==='number'&&r.ancora<8).length;
   const mImpl=_mediaBloco(rs,'bloco_implementador');
   const mProc=_mediaBloco(rs,'bloco_processo');
   const mProd=_mediaBloco(rs,'bloco_produto');
@@ -1164,14 +1166,14 @@ function renderSatisfacao(){
             const mpd=_mediaBloco([r],'bloco_produto');
             const badge=r.ancora>=8?'<span class="sat-badge ok">✓ OK</span>':'<span class="sat-badge acao">⚑ Ação necessária</span>';
             return `<tr>
-              <td style="font-weight:600">${r.cliente_nome||r.cliente_slug}</td>
+              <td style="font-weight:600">${_esc(r.cliente_nome||r.cliente_slug)}</td>
               <td style="color:var(--text2);white-space:nowrap">${fmtData(r.data_resposta)}</td>
               <td>${notaHtml(r.ancora)}</td>
               <td style="${bCor(mi)};font-weight:600">${mi!==null?mi.toFixed(1):'—'}</td>
               <td style="${bCor(mp)};font-weight:600">${mp!==null?mp.toFixed(1):'—'}</td>
               <td style="${bCor(mpd)};font-weight:600">${mpd!==null?mpd.toFixed(1):'—'}</td>
               <td>${badge}</td>
-              <td class="sat-melhorar">${r.aberta_melhorar?r.aberta_melhorar.slice(0,120)+(r.aberta_melhorar.length>120?'…':''):'<span style="color:var(--text2)">—</span>'}</td>
+              <td class="sat-melhorar">${r.aberta_melhorar?_esc(r.aberta_melhorar.slice(0,120))+(r.aberta_melhorar.length>120?'…':''):'<span style="color:var(--text2)">—</span>'}</td>
             </tr>`;
           }).join('')}
         </tbody>

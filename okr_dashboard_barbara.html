@@ -55,6 +55,31 @@ html[data-theme="dark"] .anl-table th{background:#171928;}
 html[data-theme="dark"] .anl-table tbody tr:hover td{background:#1e2030;}
 html[data-theme="dark"] .anl-table .row-total td{background:#171928;}
 html[data-theme="dark"] .kr-bar-wrap{background:#252840;}
+.sat-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;}
+.sat-kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1rem;text-align:center;}
+.sat-kpi-label{font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+.sat-kpi-val{font-size:26px;font-weight:700;color:var(--text);}
+.sat-kpi-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.sat-progress{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1rem 1.25rem;margin-bottom:16px;}
+.sat-progress-label{font-size:12px;color:var(--text2);margin-bottom:8px;}
+.sat-bar{height:10px;background:var(--border);border-radius:99px;overflow:hidden;}
+.sat-bar-fill{height:100%;border-radius:99px;background:var(--green-mid);transition:width .4s;}
+.sat-bar-meta{font-size:11px;color:var(--text2);margin-top:5px;}
+.sat-blocos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.sat-bloco{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:.75rem 1rem;}
+.sat-bloco-nome{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.sat-bloco-val{font-size:20px;font-weight:700;}
+.sat-table-wrap{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow-x:auto;}
+.sat-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+.sat-table th{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+.sat-table td{padding:10px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;}
+.sat-table tr:last-child td{border-bottom:none;}
+.sat-nota{font-size:16px;font-weight:700;}
+.sat-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;}
+.sat-badge.ok{background:var(--green-bg);color:var(--green);}
+.sat-badge.acao{background:var(--red-bg);color:var(--red);}
+.sat-melhorar{font-size:11px;color:var(--text2);line-height:1.4;max-width:180px;}
+.sat-vazio{text-align:center;padding:32px;color:var(--text2);font-size:13px;}
 html[data-theme="dark"] .tabs{background:#1c1e30;}
 html[data-theme="dark"] .tab:hover:not(.active){background:#252840;color:var(--text);}
 html[data-theme="dark"] .sum-card::before,html[data-theme="dark"] .obj-header::before{opacity:.8;}
@@ -398,6 +423,7 @@ body.apresentacao .obj-section { display:block !important; }
   <div class="tab" onclick="switchTab(1)">⭐ Obj 2 · Qualidade no Go Live</div>
   <div class="tab" onclick="switchTab(2)">📈 Obj 3 · Consultoria</div>
   <div class="tab" onclick="switchTab(3)">📊 Análise Mensal</div>
+  <div class="tab" onclick="switchTab(4)">📋 Satisfação Go-Live</div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 4px;">
     <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 Ano:</span>
     <select class="ki" id="sel-ano-graficos" style="width:72px;padding:4px 6px;" onchange="updateCharts()"></select>
@@ -452,6 +478,20 @@ body.apresentacao .obj-section { display:block !important; }
   </div>
   <div class="charts-row">
     <div class="chart-card"><h3>⭐ Nota média nos atendimentos de consultoria (0–10)</h3><div class="chart-wrap"><canvas id="ch-nota-cons" role="img" aria-label="Nota consultoria"></canvas></div></div>
+  </div>
+</div>
+
+<!-- SATISFAÇÃO GO-LIVE -->
+<div class="obj-section" id="obj4">
+  <div class="obj-header c2">
+    <div class="obj-icon">📋</div>
+    <div>
+      <div class="obj-title">Satisfação no Go-Live — KR6</div>
+      <div class="obj-sub">Meta: nota mínima 8,0 · Métrica: média das âncoras de satisfação geral</div>
+    </div>
+  </div>
+  <div id="sat-content">
+    <div class="sat-vazio">Carregando dados...</div>
   </div>
 </div>
 
@@ -1043,10 +1083,107 @@ function updateCharts(changedKrIdx){
   if(all || changedKrIdx === KR_IDX_NOTA_CONS) _setChartSeries(charts.nota_cons, 0, KR_IDX_NOTA_CONS);
 }
 
+function _notaCor(n){
+  if(n===null||n===undefined) return 'var(--text2)';
+  if(n>=8) return 'var(--green)';
+  if(n>=6) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+function _mediaBloco(respostas,bloco){
+  if(!respostas.length) return null;
+  const vals=respostas.map(r=>{
+    const b=r[bloco];
+    if(!b) return null;
+    const ns=Object.values(b).filter(v=>typeof v==='number');
+    return ns.length?ns.reduce((a,b)=>a+b,0)/ns.length:null;
+  }).filter(v=>v!==null);
+  return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10:null;
+}
+
+function renderSatisfacao(){
+  const el=document.getElementById('sat-content');
+  const rs=SATISFACAO_RESPOSTAS;
+  if(!rs.length){
+    el.innerHTML='<div class="sat-vazio">Nenhuma resposta coletada ainda.<br>Use o <strong>gerador de links</strong> para enviar a pesquisa aos clientes após o go-live.</div>';
+    return;
+  }
+  const ancora_vals=rs.map(r=>r.ancora).filter(v=>typeof v==='number');
+  const media=ancora_vals.length?Math.round(ancora_vals.reduce((a,b)=>a+b,0)/ancora_vals.length*10)/10:null;
+  const acao=rs.filter(r=>r.ancora<8).length;
+  const mImpl=_mediaBloco(rs,'bloco_implementador');
+  const mProc=_mediaBloco(rs,'bloco_processo');
+  const mProd=_mediaBloco(rs,'bloco_produto');
+  const pct=media!==null?Math.min(100,Math.round(media/10*100)):0;
+  function fmtData(iso){
+    if(!iso) return '—';
+    const d=new Date(iso);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`;
+  }
+  function notaHtml(n){
+    if(n===null||n===undefined) return '<span style="color:var(--text2)">—</span>';
+    return `<span class="sat-nota" style="color:${_notaCor(n)}">${n}</span>`;
+  }
+  function bCor(v){
+    if(v===null) return 'color:var(--text2)';
+    return v>=8?'color:var(--green)':v>=6?'color:var(--amber)':'color:var(--red)';
+  }
+  const sorted=[...rs].sort((a,b)=>new Date(b.data_resposta)-new Date(a.data_resposta));
+  el.innerHTML=`
+    <div class="sat-kpis">
+      <div class="sat-kpi"><div class="sat-kpi-label">Nota KR6 (média)</div><div class="sat-kpi-val" style="color:${_notaCor(media)}">${media!==null?media.toFixed(1):'—'}</div><div class="sat-kpi-meta">meta ≥ 8,0</div></div>
+      <div class="sat-kpi"><div class="sat-kpi-label">Respostas</div><div class="sat-kpi-val">${rs.length}</div><div class="sat-kpi-meta">go-lives avaliados</div></div>
+      <div class="sat-kpi"><div class="sat-kpi-label">Ação necessária</div><div class="sat-kpi-val" style="color:${acao>0?'var(--red)':'var(--green)'}">${acao}</div><div class="sat-kpi-meta">nota < 8</div></div>
+    </div>
+    <div class="sat-progress">
+      <div class="sat-progress-label">Progresso em relação à meta 8,0 / 10</div>
+      <div class="sat-bar"><div class="sat-bar-fill" style="width:${pct}%"></div></div>
+      <div class="sat-bar-meta">${media!==null?media.toFixed(1):'—'} / 10,0</div>
+    </div>
+    <div class="sat-blocos">
+      <div class="sat-bloco"><div class="sat-bloco-nome">① Implementador</div><div class="sat-bloco-val" style="${bCor(mImpl)}">${mImpl!==null?mImpl.toFixed(1):'—'}</div></div>
+      <div class="sat-bloco"><div class="sat-bloco-nome">② Processo</div><div class="sat-bloco-val" style="${bCor(mProc)}">${mProc!==null?mProc.toFixed(1):'—'}</div></div>
+      <div class="sat-bloco"><div class="sat-bloco-nome">③ Produto (CPJ)</div><div class="sat-bloco-val" style="${bCor(mProd)}">${mProd!==null?mProd.toFixed(1):'—'}</div></div>
+    </div>
+    <div class="sat-table-wrap">
+      <table class="sat-table">
+        <thead><tr>
+          <th style="width:18%">Escritório</th>
+          <th style="width:9%">Data</th>
+          <th style="width:8%">Geral</th>
+          <th style="width:8%">Impl.</th>
+          <th style="width:8%">Proc.</th>
+          <th style="width:8%">Prod.</th>
+          <th style="width:12%">Status CS</th>
+          <th style="width:29%">O que melhorar</th>
+        </tr></thead>
+        <tbody>
+          ${sorted.map(r=>{
+            const mi=_mediaBloco([r],'bloco_implementador');
+            const mp=_mediaBloco([r],'bloco_processo');
+            const mpd=_mediaBloco([r],'bloco_produto');
+            const badge=r.ancora>=8?'<span class="sat-badge ok">✓ OK</span>':'<span class="sat-badge acao">⚑ Ação necessária</span>';
+            return `<tr>
+              <td style="font-weight:600">${r.cliente_nome||r.cliente_slug}</td>
+              <td style="color:var(--text2);white-space:nowrap">${fmtData(r.data_resposta)}</td>
+              <td>${notaHtml(r.ancora)}</td>
+              <td style="${bCor(mi)};font-weight:600">${mi!==null?mi.toFixed(1):'—'}</td>
+              <td style="${bCor(mp)};font-weight:600">${mp!==null?mp.toFixed(1):'—'}</td>
+              <td style="${bCor(mpd)};font-weight:600">${mpd!==null?mpd.toFixed(1):'—'}</td>
+              <td>${badge}</td>
+              <td class="sat-melhorar">${r.aberta_melhorar?r.aberta_melhorar.slice(0,120)+(r.aberta_melhorar.length>120?'…':''):'<span style="color:var(--text2)">—</span>'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
 function switchTab(idx){
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
   document.querySelectorAll('.obj-section').forEach((s,i)=>s.classList.toggle('active',i===idx));
   if(idx===3) renderAnalysis();
+  if(idx===4) renderSatisfacao();
 }
 
 // ─── ANÁLISE MENSAL ───────────────────────────────────────────
@@ -1291,6 +1428,8 @@ function _applyTheme(t){
 const GH_OWNER = 'cecossi';
 const GH_REPO  = 'OKR';
 const GH_PATH  = 'data/okr-data.json';
+const GH_PATH_SAT = 'data/respostas-satisfacao.json';
+let SATISFACAO_RESPOSTAS = [];
 
 function setSyncStatus(st){
   const el = document.getElementById('sync-status');
@@ -1326,6 +1465,19 @@ async function syncToServer(){
   } catch(e){ setSyncStatus('offline'); console.warn('syncToServer offline:', e); }
 }
 
+async function pullSatisfacaoFromGitHub(){
+  try {
+    const res = await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH_SAT}?t=${Date.now()}`);
+    if(!res.ok) return;
+    SATISFACAO_RESPOSTAS = await res.json();
+    if(SATISFACAO_RESPOSTAS.length > 0){
+      const media = SATISFACAO_RESPOSTAS.reduce((s,r) => s + r.ancora, 0) / SATISFACAO_RESPOSTAS.length;
+      KRS[5].atual = Math.round(media * 10) / 10;
+      KRS[5].status = media >= 8 ? 'ok' : (media >= 6 ? 'ea' : 'at');
+    }
+  } catch(e){ console.warn('pullSatisfacaoFromGitHub erro:', e); }
+}
+
 // Lê dados do GitHub (público, sem token)
 async function pullFromGitHub(){
   try {
@@ -1345,8 +1497,12 @@ async function pullFromGitHub(){
 }
 
 async function initSync(){
-  const updated = await pullFromGitHub();
+  const [updated] = await Promise.all([
+    pullFromGitHub(),
+    pullSatisfacaoFromGitHub()
+  ]);
   if(updated){ renderKRs(); updateCharts(); loadNotesMes(); updateNotesCount(); _renderHistoricoChips(); }
+  else { renderKRs(); }
 }
 
 function openSyncModal(){ document.getElementById('sync-modal').style.display = 'flex'; }

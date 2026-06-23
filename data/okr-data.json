@@ -1,7 +1,7 @@
 {
-  "savedAt": "2026-06-23T20:03:05.852Z",
+  "savedAt": "2026-06-23T20:08:14.980Z",
   "data": {
-    "savedAt": "2026-06-23T20:03:05.852Z",
+    "savedAt": "2026-06-23T20:08:14.980Z",
     "version": 3,
     "refMes": "Mai/2026",
     "krs": [
@@ -63,7 +63,13 @@
       }
     ],
     "hist": [
-      [],
+      [
+        {
+          "semana": "Semana 26 · 23/Jun/2026",
+          "acoes": "Em acompanhamento mensal",
+          "proximos": ""
+        }
+      ],
       [],
       [],
       [],

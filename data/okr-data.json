@@ -1,7 +1,7 @@
 {
-  "savedAt": "2026-06-23T19:55:23.279Z",
+  "savedAt": "2026-06-23T20:03:05.852Z",
   "data": {
-    "savedAt": "2026-06-23T19:55:23.279Z",
+    "savedAt": "2026-06-23T20:03:05.852Z",
     "version": 3,
     "refMes": "Mai/2026",
     "krs": [
@@ -23,7 +23,7 @@
       },
       {
         "atual": 0,
-        "status": "ni"
+        "status": "ea"
       },
       {
         "atual": null,

@@ -1499,12 +1499,10 @@ async function pullFromGitHub(){
 }
 
 async function initSync(){
-  const [updated] = await Promise.all([
-    pullFromGitHub(),
-    pullSatisfacaoFromGitHub()
-  ]);
-  if(updated){ renderKRs(); updateCharts(); loadNotesMes(); updateNotesCount(); _renderHistoricoChips(); }
-  else { renderKRs(); }
+  const updated = await pullFromGitHub();
+  await pullSatisfacaoFromGitHub();
+  renderKRs();
+  if(updated){ updateCharts(); loadNotesMes(); updateNotesCount(); _renderHistoricoChips(); }
 }
 
 function openSyncModal(){ document.getElementById('sync-modal').style.display = 'flex'; }

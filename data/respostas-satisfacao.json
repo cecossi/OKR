@@ -18,5 +18,25 @@
     },
     "aberta_melhorar": "Nada a melhorar � deploy de teste",
     "aberta_agradou": "Tudo certo!"
+  },
+  {
+    "cliente_slug": "teste-chagas",
+    "cliente_nome": "TESTE CHAGAS",
+    "data_resposta": "2026-06-23T20:04:03.156Z",
+    "ancora": 7,
+    "bloco_implementador": {
+      "dominio_tecnico": 7,
+      "clareza_comunicacao": 7
+    },
+    "bloco_processo": {
+      "cumprimento_prazo": 7,
+      "treinamento_equipe": 7
+    },
+    "bloco_produto": {
+      "atende_necessidades": 8,
+      "entregou_prometido": 8
+    },
+    "aberta_melhorar": "TESTES",
+    "aberta_agradou": "TESTES"
   }
 ]

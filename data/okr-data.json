@@ -1,7 +1,7 @@
 {
-  "savedAt": "2026-06-22T21:05:34.028Z",
+  "savedAt": "2026-06-23T19:55:23.279Z",
   "data": {
-    "savedAt": "2026-06-22T21:05:34.028Z",
+    "savedAt": "2026-06-23T19:55:23.279Z",
     "version": 3,
     "refMes": "Mai/2026",
     "krs": [
@@ -67,7 +67,13 @@
       [],
       [],
       [],
-      [],
+      [
+        {
+          "semana": "Semana 26 · 23/Jun/2026",
+          "acoes": "Construído o formulário de satisfação e testado: https://pesquisa-golive-preambulo.netlify.app/?cliente=teste-chagas&nome=TESTE%20CHAGAS",
+          "proximos": "Passar a enviar o formulário para o cliente e monitorar."
+        }
+      ],
       [],
       [
         {

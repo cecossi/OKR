@@ -1,0 +1,22 @@
+[
+  {
+    "cliente_slug": "teste-deploy",
+    "cliente_nome": "Escrit�rio Teste",
+    "data_resposta": "2026-06-23T18:00:00.000Z",
+    "ancora": 9,
+    "bloco_implementador": {
+      "dominio_tecnico": 9,
+      "clareza_comunicacao": 8
+    },
+    "bloco_processo": {
+      "cumprimento_prazo": 9,
+      "treinamento_equipe": 8
+    },
+    "bloco_produto": {
+      "atende_necessidades": 9,
+      "entregou_prometido": 9
+    },
+    "aberta_melhorar": "Nada a melhorar � deploy de teste",
+    "aberta_agradou": "Tudo certo!"
+  }
+]

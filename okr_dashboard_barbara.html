@@ -39,6 +39,8 @@
 #auth-erro{color:#ffb3b3;font-size:12px;display:none;margin-top:-8px;}
 #auth-overlay .btn-login{background:#fff;color:#2C3799;border:none;border-radius:24px;padding:12px 40px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;transition:opacity .15s;}
 #auth-overlay .btn-login:hover{opacity:.88;}
+#auth-hint{color:rgba(255,255,255,0.4);font-size:12px;margin-top:-4px;}
+#auth-hint a{color:rgba(255,255,255,0.65);text-decoration:underline;cursor:pointer;}
 /* ── DARK MODE ── */
 html[data-theme="dark"]{
   --bg:#12131f; --card:#1c1e30; --header:#343748;
@@ -358,6 +360,7 @@ body.apresentacao .obj-section { display:block !important; }
     onkeydown="if(event.key==='Enter') doLogin()">
   <span id="auth-erro">Código incorreto. Tente novamente.</span>
   <button class="btn-login" onclick="doLogin()">Entrar</button>
+  <p id="auth-hint">Não sabe o código? <a href="mailto:barbaracecossi.adv@gmail.com">Solicite à administração</a></p>
 </div>
 
 <div class="wrap">
@@ -536,6 +539,15 @@ body.apresentacao .obj-section { display:block !important; }
       <button class="btn-sync-cancel" onclick="closeSyncModal()">Fechar</button>
     </div>
     <hr style="margin:20px 0;border:none;border-top:1px solid var(--border);">
+    <p style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px;">🔑 Alterar código de acesso</p>
+    <div style="display:flex;gap:8px;margin-bottom:6px;">
+      <input id="new-code-inp" type="text" placeholder="Novo código de acesso"
+        style="flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;outline:none;background:var(--card);color:var(--text);"
+        onkeydown="if(event.key==='Enter') changeAccessCode()">
+      <button onclick="changeAccessCode()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Alterar</button>
+    </div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:16px;">Todos os dispositivos precisarão digitar o novo código.</p>
+    <hr style="margin:0 0 16px;border:none;border-top:1px solid var(--border);">
     <p style="font-size:11px;color:#c0392b;font-weight:700;margin-bottom:8px;">⚠️ Zona de perigo</p>
     <button onclick="clearData()" style="background:#fff0f0;color:#c0392b;border:1.5px solid #f5b7b1;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;width:100%;">🗑️ Limpar todos os dados do dashboard</button>
   </div>
@@ -1364,7 +1376,8 @@ function _buildPayload(extra){
     krs: KRS.map(k=>({atual:k.atual, status:k.status})),
     hist: HIST,
     monthlyVals: MONTHLY_VALS,
-    monthlyNotes: MONTHLY_NOTES
+    monthlyNotes: MONTHLY_NOTES,
+    accessCode: authCodigo
   }, extra||{});
 }
 
@@ -1391,39 +1404,52 @@ function _applyTheme(t){
 (()=>{ _applyTheme(localStorage.getItem('okr_theme')||'light'); })();
 
 // ─── AUTH POR CÓDIGO DE ACESSO ──────────────────────────────────────────────
+const AUTH_DEFAULT = 'preambulo2026';
+let authCodigo = localStorage.getItem('okr_access_code') || AUTH_DEFAULT;
+
+// Chave de sessão derivada do código — muda automaticamente quando o código muda
+function _authKey(){ return 'okr_s_' + btoa(authCodigo).replace(/\W/g,'').slice(0,10); }
+
+function _liberar(){
+  document.getElementById('auth-overlay').style.display = 'none';
+  const b = document.getElementById('btn-logout');
+  if(b) b.style.display = 'block';
+}
+function _bloquear(){
+  document.getElementById('auth-overlay').style.display = 'flex';
+  const b = document.getElementById('btn-logout');
+  if(b) b.style.display = 'none';
+}
+
+if(localStorage.getItem(_authKey()) === '1'){ _liberar(); }
+
+window.doLogin = function(){
+  const val = (document.getElementById('auth-inp').value || '').trim();
+  if(val === authCodigo){
+    localStorage.setItem(_authKey(), '1');
+    _liberar();
+  } else {
+    document.getElementById('auth-erro').style.display = 'block';
+    document.getElementById('auth-inp').value = '';
+    document.getElementById('auth-inp').focus();
+  }
+};
+
+window.changeAccessCode = function(){
+  const newCode = (document.getElementById('new-code-inp').value || '').trim();
+  if(!newCode){ alert('Digite o novo código.'); return; }
+  if(!confirm('Alterar o código de acesso para "' + newCode + '"?\n\nTodos precisarão digitar o novo código no próximo acesso.')){ return; }
+  authCodigo = newCode;
+  localStorage.setItem('okr_access_code', newCode);
+  localStorage.setItem(_authKey(), '1'); // mantém sessão atual com novo código
+  document.getElementById('new-code-inp').value = '';
+  saveData(); // sincroniza novo código para o GitHub
+  closeSyncModal();
+};
+
 (function(){
-  const CODIGO = 'preambulo2026';
-  const CHAVE  = 'okr_auth_v1';
-  const overlay = document.getElementById('auth-overlay');
-  const btnLogout = document.getElementById('btn-logout');
-
-  function liberar(){
-    overlay.style.display = 'none';
-    if(btnLogout) btnLogout.style.display = 'block';
-  }
-
-  // já autenticado neste dispositivo?
-  if(localStorage.getItem(CHAVE) === '1') { liberar(); return; }
-
-  window.doLogin = function(){
-    const val = (document.getElementById('auth-inp').value || '').trim();
-    if(val === CODIGO){
-      localStorage.setItem(CHAVE, '1');
-      liberar();
-    } else {
-      document.getElementById('auth-erro').style.display = 'block';
-      document.getElementById('auth-inp').value = '';
-      document.getElementById('auth-inp').focus();
-    }
-  };
-
-  // logout
-  if(btnLogout){
-    btnLogout.onclick = function(){
-      localStorage.removeItem(CHAVE);
-      location.reload();
-    };
-  }
+  const b = document.getElementById('btn-logout');
+  if(b) b.onclick = function(){ localStorage.removeItem(_authKey()); location.reload(); };
 })();
 
 // ─── GITHUB SYNC ────────────────────────────────────────────────────────────
@@ -1491,7 +1517,16 @@ async function pullFromGitHub(){
       const local = JSON.parse(localRaw);
       if(local.savedAt && remote.savedAt && local.savedAt >= remote.savedAt){ setSyncStatus('ok'); return false; }
     }
-    if(remote.data){ _applyData(remote.data); localStorage.setItem(STORAGE_KEY, JSON.stringify(remote.data)); }
+    if(remote.data){
+      _applyData(remote.data);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(remote.data));
+      // atualiza código de acesso se o admin alterou
+      if(remote.data.accessCode && remote.data.accessCode !== authCodigo){
+        authCodigo = remote.data.accessCode;
+        localStorage.setItem('okr_access_code', authCodigo);
+        if(localStorage.getItem(_authKey()) !== '1'){ _bloquear(); }
+      }
+    }
     if(remote.analyses){ Object.assign(MONTHLY_ANALYSIS, remote.analyses); localStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(remote.analyses)); }
     setSyncStatus('ok');
     return true;

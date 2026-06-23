@@ -1,7 +1,7 @@
 {
-  "savedAt": "2026-06-23T20:08:39.299Z",
+  "savedAt": "2026-06-23T20:09:51.633Z",
   "data": {
-    "savedAt": "2026-06-23T20:08:39.299Z",
+    "savedAt": "2026-06-23T20:09:51.633Z",
     "version": 3,
     "refMes": "Mai/2026",
     "krs": [
@@ -72,7 +72,13 @@
       ],
       [],
       [],
-      [],
+      [
+        {
+          "semana": "Semana 26 · 23/Jun/2026",
+          "acoes": "Revendo os projetos de implementação e seus add-ons. \nÚltima reunião realizada no dia 23/06, revisando todos o projeto de jornada e dos add-ons, revendo indicação de atividades e SLAs.",
+          "proximos": ""
+        }
+      ],
       [
         {
           "semana": "Semana 26 · 23/Jun/2026",

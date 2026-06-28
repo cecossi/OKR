@@ -1,7 +1,25 @@
 {
-  "savedAt": "2026-06-27T00:00:00Z",
+  "savedAt": "2026-06-27T12:00:00Z",
   "data": {
-    "version": 3
+    "version": 3,
+    "refMes": "Jun/2026",
+    "portfolio": {
+      "updatedAt": "2026-06-27",
+      "projects": [
+        {
+          "nr": "202457805",
+          "cod": "200",
+          "cliente": "Dresch Filho & Advogados",
+          "resp": "CLAUDINE",
+          "produto": "CPJ-3C",
+          "sub": "STARTER",
+          "status": "AGUARDANDO PIL",
+          "dtSerial": 45519,
+          "pct": 31.11,
+          "resumoNotion": null
+        }
+      ]
+    }
   },
   "analyses": {}
 }

@@ -1,25 +1,454 @@
 {
-  "savedAt": "2026-06-27T12:00:00Z",
+  "savedAt": "2026-06-23T20:15:59.694Z",
   "data": {
+    "savedAt": "2026-06-23T20:15:59.694Z",
     "version": 3,
-    "refMes": "Jun/2026",
-    "portfolio": {
-      "updatedAt": "2026-06-27",
-      "projects": [
+    "refMes": "Mai/2026",
+    "krs": [
+      {
+        "atual": 64.5,
+        "status": "ea"
+      },
+      {
+        "atual": null,
+        "status": "ni"
+      },
+      {
+        "atual": 0,
+        "status": "ni"
+      },
+      {
+        "atual": 0,
+        "status": "ea"
+      },
+      {
+        "atual": 0,
+        "status": "ea"
+      },
+      {
+        "atual": 8,
+        "status": "ea"
+      },
+      {
+        "atual": 1,
+        "status": "ea"
+      },
+      {
+        "atual": null,
+        "status": "ni"
+      },
+      {
+        "atual": null,
+        "status": "ni"
+      },
+      {
+        "atual": 42.28,
+        "status": "at"
+      },
+      {
+        "atual": 34.57,
+        "status": "ea"
+      },
+      {
+        "atual": 25,
+        "status": "ea"
+      },
+      {
+        "atual": 0,
+        "status": "ni"
+      },
+      {
+        "atual": null,
+        "status": "ni"
+      }
+    ],
+    "hist": [
+      [
         {
-          "nr": "202457805",
-          "cod": "200",
-          "cliente": "Dresch Filho & Advogados",
-          "resp": "CLAUDINE",
-          "produto": "CPJ-3C",
-          "sub": "STARTER",
-          "status": "AGUARDANDO PIL",
-          "dtSerial": 45519,
-          "pct": 31.11,
-          "resumoNotion": null
+          "semana": "Semana 26 · 23/Jun/2026",
+          "acoes": "Em acompanhamento mensal",
+          "proximos": ""
         }
-      ]
+      ],
+      [],
+      [],
+      [
+        {
+          "semana": "Semana 26 · 23/Jun/2026",
+          "acoes": "Revendo os projetos de implementação e seus add-ons. \nÚltima reunião realizada no dia 23/06, revisando todos o projeto de jornada e dos add-ons, revendo indicação de atividades e SLAs.",
+          "proximos": ""
+        }
+      ],
+      [
+        {
+          "semana": "Semana 26 · 23/Jun/2026",
+          "acoes": "Construído o formulário de satisfação e testado: https://pesquisa-golive-preambulo.netlify.app/?cliente=teste-chagas&nome=TESTE%20CHAGAS",
+          "proximos": "Passar a enviar o formulário para o cliente e monitorar."
+        }
+      ],
+      [
+        {
+          "semana": "Semana 26 · 23/Jun/2026",
+          "acoes": "Realizado teste  com o formulário em 23/06.",
+          "proximos": ""
+        }
+      ],
+      [
+        {
+          "semana": "Semana 25 · 19/Jun/2026",
+          "acoes": "Implementado em 19/06/2026. Primeiro cliente com o registro: 46966 - R. C. MELO SOCIEDADE INDIVIDUAL DE ADVOCACIA",
+          "proximos": "Permanecer realizando a utilização e automatizar o envio para os canais de CS, comercial e HD."
+        },
+        {
+          "semana": "Semana 24 · 11/Jun/2026",
+          "acoes": "",
+          "proximos": "Implementar em projetos encerrados."
+        },
+        {
+          "semana": "Semana 24 · 11/Jun/2026",
+          "acoes": "Criado o checklist, implementadores orientados sobre o uso e importância.",
+          "proximos": ""
+        }
+      ],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ],
+    "monthlyVals": [
+      {
+        "Mai/2026": 64.5
+      },
+      {},
+      {},
+      {
+        "Mai/2026": 0
+      },
+      {},
+      {
+        "Mai/2026": 8
+      },
+      {},
+      {},
+      {},
+      {
+        "Mai/2026": 42.28
+      },
+      {
+        "Mai/2026": 34.57
+      },
+      {},
+      {},
+      {}
+    ],
+    "monthlyNotes": {
+      "Jun/2026": "Contexto Maio/2026 (baseline de entrada no período OKR):\n• KR1 — Prazo: 8 projetos fechados. Média geral 68,6d | Jornada 64,5d | Upgrade 72,8d. Meta jun/26: 39,6d. Clientes acima da meta: Coutinho (96d), Roberlei (78d), Guimarães (73d), Bernert (164d).\n• KR3 — Checklist migração: não implantado. Necessário antes dos próximos go lives.\n• KR10 — Utilização consultoria: 42,3% (baseline era 47,9%). 4 clientes sem uso: Higino Sordi, GAW Advogados, G.E.S. Toporoski, BBB → ação proativa necessária.\n• KR11 — 34,6% dos clientes usam ≥80% das horas contratadas (meta: 70%).\n• KR12 — 4 clientes identificados com 0h no mês.\nFonte: Planilha \"Maio de 2026.xlsx\" · Hydra · Projetos Jornada CPJ-3C."
     }
   },
-  "analyses": {}
+  "analyses": {
+    "Mai/2026": {
+      "projetos": {
+        "fonte": "Fechados_em_maio_de_2026.xlsx · Produto CPJ-3C · Subcategorias: JORNADA e UPGRADE",
+        "resumo": {
+          "total": 8,
+          "jornada": 4,
+          "upgrade": 4,
+          "mediaDias": 68.6,
+          "mediaJornada": 64.5,
+          "mediaUpgrade": 72.8,
+          "metaMes": 39.6
+        },
+        "lista": [
+          {
+            "cliente": "Coutinho e Oliveira Soc. de Advogados",
+            "resp": "Claudine Max Strapasson",
+            "enc": "05/05/2026",
+            "dias": 96,
+            "tipo": "JORNADA",
+            "st": "bad"
+          },
+          {
+            "cliente": "Guimarães e Bordinhão Advogados Assoc.",
+            "resp": "Claudine Max Strapasson",
+            "enc": "14/05/2026",
+            "dias": 73,
+            "tipo": "JORNADA",
+            "st": "bad"
+          },
+          {
+            "cliente": "Roberlei Queiroz - Soc. Ind. de Advocacia",
+            "resp": "Claudine Max Strapasson",
+            "enc": "26/05/2026",
+            "dias": 78,
+            "tipo": "JORNADA",
+            "st": "bad"
+          },
+          {
+            "cliente": "Cavalcanti Mendes Advogados",
+            "resp": "Priscila Antunes",
+            "enc": "26/05/2026",
+            "dias": 11,
+            "tipo": "JORNADA",
+            "st": "ok"
+          },
+          {
+            "cliente": "Bernert Sociedade de Advogados",
+            "resp": "Claudine Max Strapasson",
+            "enc": "08/05/2026",
+            "dias": 164,
+            "tipo": "UPGRADE",
+            "st": "bad"
+          },
+          {
+            "cliente": "Maranhão de Loyola & Nogueira Adv.",
+            "resp": "Priscila Antunes",
+            "enc": "11/05/2026",
+            "dias": 56,
+            "tipo": "UPGRADE",
+            "st": "warn"
+          },
+          {
+            "cliente": "Tedeschi Advogados Associados",
+            "resp": "Claudine Max Strapasson",
+            "enc": "29/05/2026",
+            "dias": 45,
+            "tipo": "UPGRADE",
+            "st": "warn"
+          },
+          {
+            "cliente": "Tônia Alteiro Groenwold - Soc. Individual",
+            "resp": "Priscila Antunes",
+            "enc": "25/05/2026",
+            "dias": 26,
+            "tipo": "UPGRADE",
+            "st": "ok"
+          }
+        ]
+      },
+      "horasTime": {
+        "fonte": "Hydra · Tarefas executadas + em andamento · Todas as categorias · CPJ-3C e demais · Capacidade ref: 128h/mês (80% contratado)",
+        "capacidade": 128,
+        "lista": [
+          {
+            "colab": "Rosane Maria Welker",
+            "horas": 123.85,
+            "pct": 0.202,
+            "obs": ""
+          },
+          {
+            "colab": "Jeferson Strapasson",
+            "horas": 115.87,
+            "pct": 0.189,
+            "obs": ""
+          },
+          {
+            "colab": "Gilmar Friguetto",
+            "horas": 111.83,
+            "pct": 0.182,
+            "obs": ""
+          },
+          {
+            "colab": "Diogo Pastoriza Sant Helena",
+            "horas": 107.98,
+            "pct": 0.176,
+            "obs": ""
+          },
+          {
+            "colab": "Edercion Luiz Komincki",
+            "horas": 96.58,
+            "pct": 0.157,
+            "obs": ""
+          },
+          {
+            "colab": "Jhenifer Machado",
+            "horas": 53.22,
+            "pct": 0.087,
+            "obs": "Férias 04–13/05"
+          },
+          {
+            "colab": "Anna Flora C. de Oliveira",
+            "horas": 4.43,
+            "pct": 0.007,
+            "obs": "Férias 04–18/05 + projeto RMS"
+          }
+        ]
+      },
+      "consultoria": {
+        "fonte": "Hydra · Categoria CONSULTORIA + Produto CPJ-3C · HS Vendidas base: 781h · HS Executadas: 330,2h · Hapner & Kroetz: faturamento pós-uso",
+        "resumo": {
+          "taxa": 0.423,
+          "metaMes": 0.525,
+          "clientesAcima80": 0.346,
+          "clientes0h": 4
+        },
+        "topClientes": [
+          {
+            "cliente": "Farracha de Castro Advogados Assoc.",
+            "hsExec": 25.17,
+            "taxa": 0.5136,
+            "consultor": "Jeferson Strapasson",
+            "st": "warn"
+          },
+          {
+            "cliente": "Rocha, Marinho e Sales Soc. Advogados",
+            "hsExec": 20.67,
+            "taxa": 4.1333,
+            "consultor": "Jeferson Strapasson",
+            "st": "ok"
+          },
+          {
+            "cliente": "Sanepar - Pju / Cdi",
+            "hsExec": 16.93,
+            "taxa": 0.8911,
+            "consultor": "Jeferson Strapasson",
+            "st": "ok"
+          },
+          {
+            "cliente": "Crespo e Caires Advogados Assoc.",
+            "hsExec": 14.8,
+            "taxa": 0.74,
+            "consultor": "Diogo Helena",
+            "st": "warn"
+          },
+          {
+            "cliente": "Vernalha Pereira Advogados",
+            "hsExec": 14.25,
+            "taxa": 0.8906,
+            "consultor": "Jeferson Strapasson",
+            "st": "ok"
+          },
+          {
+            "cliente": "Lima, Cabral Advogados Assoc.",
+            "hsExec": 13.75,
+            "taxa": 0.8594,
+            "consultor": "Gilmar Friguetto",
+            "st": "ok"
+          },
+          {
+            "cliente": "Filla & Munhoz da Rocha Adv. Assoc.",
+            "hsExec": 11.47,
+            "taxa": 1.1467,
+            "consultor": "Rosane Welker",
+            "st": "ok"
+          },
+          {
+            "cliente": "Santiago Advogados Assoc. - Sister",
+            "hsExec": 10.82,
+            "taxa": 1.3521,
+            "consultor": "Diogo Helena",
+            "st": "ok"
+          },
+          {
+            "cliente": "Ferrari Turra, Bona Turra & Advogados",
+            "hsExec": 10.33,
+            "taxa": 1.1481,
+            "consultor": "Edercion Komincki",
+            "st": "ok"
+          },
+          {
+            "cliente": "Perez de Rezende - Advogados",
+            "hsExec": 10,
+            "taxa": 0.4762,
+            "consultor": "Diogo Helena",
+            "st": "warn"
+          },
+          {
+            "cliente": "Maciel Antunes Advogados",
+            "hsExec": 9.93,
+            "taxa": 0.9933,
+            "consultor": "Rosane Welker",
+            "st": "ok"
+          },
+          {
+            "cliente": "Bonatto & Bonatto Advogados Assoc.",
+            "hsExec": 8.75,
+            "taxa": 1.0938,
+            "consultor": "Gilmar Friguetto",
+            "st": "ok"
+          },
+          {
+            "cliente": "Hapner & Kroetz Advogados S/C",
+            "hsExec": 8.33,
+            "taxa": null,
+            "consultor": "Jeferson Strapasson",
+            "st": "info"
+          },
+          {
+            "cliente": "Didier, Sodré e Rosa Adv. e Consultoria",
+            "hsExec": 8.25,
+            "taxa": 1.375,
+            "consultor": "Jeferson Strapasson",
+            "st": "ok"
+          },
+          {
+            "cliente": "André Menescal Advogados",
+            "hsExec": 7.87,
+            "taxa": 0.6051,
+            "consultor": "Rosane Welker",
+            "st": "warn"
+          },
+          {
+            "cliente": "Dunice e Marcon Advogados Assoc.",
+            "hsExec": 7.3,
+            "taxa": 0.6083,
+            "consultor": "Rosane Welker",
+            "st": "warn"
+          },
+          {
+            "cliente": "Dotti Advogados",
+            "hsExec": 6.08,
+            "taxa": 1.0139,
+            "consultor": "Gilmar Friguetto",
+            "st": "ok"
+          },
+          {
+            "cliente": "Gomes Coelho & Bordin - Soc. Advogados",
+            "hsExec": 6,
+            "taxa": 1.5,
+            "consultor": "Edercion Komincki",
+            "st": "ok"
+          },
+          {
+            "cliente": "Bonini Guedes Advocacia",
+            "hsExec": 5.2,
+            "taxa": 1.3,
+            "consultor": "Edercion Komincki",
+            "st": "ok"
+          },
+          {
+            "cliente": "Bassetto Advogados",
+            "hsExec": 4.92,
+            "taxa": 1.6389,
+            "consultor": "Edercion Komincki",
+            "st": "ok"
+          }
+        ],
+        "clientes0h": [
+          {
+            "cliente": "Higino, Sordi, Sousa, Toledano & Adv.",
+            "hsCont": 4,
+            "consultor": "Anna Oliveira"
+          },
+          {
+            "cliente": "GAW Advogados Associados",
+            "hsCont": 4,
+            "consultor": "Diogo Helena"
+          },
+          {
+            "cliente": "Guilherme Eduardo Stutz Toporoski",
+            "hsCont": 2,
+            "consultor": "Edercion Komincki"
+          },
+          {
+            "cliente": "BBB",
+            "hsCont": 1,
+            "consultor": "Edercion Komincki"
+          }
+        ]
+      }
+    }
+  }
 }

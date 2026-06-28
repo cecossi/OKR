@@ -82,6 +82,38 @@ html[data-theme="dark"] .kr-bar-wrap{background:#252840;}
 .sat-badge.acao{background:var(--red-bg);color:var(--red);}
 .sat-melhorar{font-size:11px;color:var(--text2);line-height:1.4;max-width:180px;}
 .sat-vazio{text-align:center;padding:32px;color:var(--text2);font-size:13px;}
+/* ── PORTFOLIO ── */
+.port-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px;}
+.port-kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:.75rem 1rem;text-align:center;}
+.port-kpi-label{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.port-kpi-val{font-size:24px;font-weight:800;color:var(--text);}
+.port-filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center;background:var(--card);padding:10px;border-radius:var(--radius);box-shadow:var(--shadow-sm);}
+.port-table-wrap{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow-x:auto;}
+.port-table{width:100%;border-collapse:collapse;font-size:12px;}
+.port-table th{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;background:var(--bg);}
+.port-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.port-table tbody tr:hover td{background:rgba(44,55,153,.04);cursor:pointer;}
+.port-table tr:last-child>td{border-bottom:none;}
+.port-alarm-red td{border-left:3px solid var(--red)!important;}
+.port-alarm-red td:first-child{border-left:3px solid var(--red)!important;}
+.port-alarm-amber td:first-child{border-left:3px solid var(--amber-mid)!important;}
+.port-alarm-green td:first-child{border-left:3px solid var(--green-mid)!important;}
+.port-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.port-badge-red{background:var(--red-bg);color:var(--red);}
+.port-badge-amber{background:var(--amber-bg);color:var(--amber);}
+.port-badge-green{background:var(--green-bg);color:var(--green);}
+.port-badge-gray{background:var(--gray-bg);color:var(--gray);}
+.port-prod-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;}
+.port-prod-3c{background:var(--blue-bg);color:var(--blue-mid);}
+.port-prod-cob{background:var(--amber-bg);color:var(--amber);}
+.port-detail{padding:14px 16px;background:var(--bg);border-top:1px solid var(--border);}
+.port-detail-label{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px;}
+html[data-theme="dark"] .port-table th{background:#12131f;}
+html[data-theme="dark"] .port-filter-bar{background:#1c1e30;}
+html[data-theme="dark"] .port-table-wrap{background:#1c1e30;}
+html[data-theme="dark"] .port-table tbody tr:hover td{background:rgba(107,125,224,.07);}
+html[data-theme="dark"] .port-detail{background:#12131f;}
+html[data-theme="dark"] .port-kpi{background:#1c1e30;}
 html[data-theme="dark"] .tabs{background:#1c1e30;}
 html[data-theme="dark"] .tab:hover:not(.active){background:#252840;color:var(--text);}
 html[data-theme="dark"] .sum-card::before,html[data-theme="dark"] .obj-header::before{opacity:.8;}
@@ -427,6 +459,7 @@ body.apresentacao .obj-section { display:block !important; }
   <div class="tab" onclick="switchTab(2)">📈 Obj 3 · Consultoria</div>
   <div class="tab" onclick="switchTab(3)">📊 Análise Mensal</div>
   <div class="tab" onclick="switchTab(4)">📋 Satisfação Go-Live</div>
+  <div class="tab" onclick="switchTab(5)">📂 Portfólio</div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 4px;">
     <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 Ano:</span>
     <select class="ki" id="sel-ano-graficos" style="width:72px;padding:4px 6px;" onchange="updateCharts()"></select>
@@ -526,6 +559,30 @@ body.apresentacao .obj-section { display:block !important; }
   </div>
   <div id="sat-content">
     <div class="sat-vazio">Carregando dados...</div>
+  </div>
+</div>
+
+<!-- PORTFÓLIO DE PROJETOS -->
+<div class="obj-section" id="obj5">
+  <div class="obj-header" style="background:linear-gradient(135deg,#1a2035,#2d3a60);border-left:4px solid #5b8dee;">
+    <div class="obj-icon">📂</div>
+    <div>
+      <div class="obj-title" style="color:#fff;">Portfólio de Projetos Pendentes</div>
+      <div class="obj-sub" style="color:rgba(255,255,255,.65);">Projetos em andamento · atualizado via planilha Excel</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <label style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
+        📤 Importar Excel
+        <input type="file" accept=".xlsx" style="display:none" onchange="importPortfolioExcel(this)">
+      </label>
+      <span id="port-updated" style="font-size:11px;color:rgba(255,255,255,.5);"></span>
+    </div>
+  </div>
+  <div id="port-content">
+    <div style="text-align:center;padding:48px;color:var(--text2);">
+      <div style="font-size:40px;margin-bottom:12px;">📋</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Carregando portfólio...</div>
+    </div>
   </div>
 </div>
 
@@ -1198,6 +1255,7 @@ function switchTab(idx){
   document.querySelectorAll('.obj-section').forEach((s,i)=>s.classList.toggle('active',i===idx));
   if(idx===3) renderAnalysis();
   if(idx===4) renderSatisfacao();
+  if(idx===5) renderPortfolio();
 }
 
 // ─── ANÁLISE MENSAL ───────────────────────────────────────────
@@ -1364,6 +1422,7 @@ function _applyData(data){
     defaultRefMes = parts[0];
     defaultRefAno = parseInt(parts[1]) || OKR_YEAR;
   }
+  if(data.portfolio) PORTFOLIO = data.portfolio;
   const el = document.getElementById('last-saved');
   if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
 }
@@ -1377,7 +1436,8 @@ function _buildPayload(extra){
     hist: HIST,
     monthlyVals: MONTHLY_VALS,
     monthlyNotes: MONTHLY_NOTES,
-    accessCode: authCodigo
+    accessCode: authCodigo,
+    portfolio: PORTFOLIO
   }, extra||{});
 }
 
@@ -1388,6 +1448,283 @@ function saveData(){
     if(el) el.textContent = new Date().toLocaleString('pt-BR');
     syncToServer();
   } catch(e){ console.warn('Não foi possível salvar:', e); }
+}
+
+// ─── PORTFÓLIO DE PROJETOS ──────────────────────────────────────────────────
+const PORTFOLIO_SEED = {
+  updatedAt:"2026-06-27",
+  projects:[
+    {nr:"202457805",cod:"200",cliente:"Dresch Filho & Advogados Associados",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"STARTER",status:"AGUARDANDO PIL",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:45519,pct:31.11,prevSerial:45709,prioridade:"NORMAL",posicaoAtual:"01/06 14:30 - PROJETO RETOMADO PARA SER FEITO POR DISCOVERY OAB. ENCAMINHADO PARA IMPLEMENTADORA EM 01/06/2026.",resumoNotion:null},
+    {nr:"202467418",cod:"40360",cliente:"GRECO, RODRIGUES, VIZENTIM ADVOGADOS",resp:"ROSANE MARIA WELKER",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EM_ANDAMENTO",fase:"TIRA DÚVIDAS",alarme:"N.INFO",dtSerial:45621,pct:null,prevSerial:45709,prioridade:"NORMAL",posicaoAtual:"10/06 20:54 - NA DATA DE 03/06 CLIENTE PONTUOU SOBRE A HIGIENIZAÇÃO DE DUPLICIDADES DE PESSOAS E INCLUSÃO DE COMARCAS.",resumoNotion:null},
+    {nr:"202617234",cod:"46270",cliente:"Lisboa Cabral Soc. Individual de Advocacia",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"SUSPENSO SEM RETORNO",fase:"AGUARD. OUTRO PROJETO",alarme:"AGUARDANDO OUTRO PROJETO",dtSerial:45756,pct:6.39,prevSerial:46164,prioridade:"NORMAL",posicaoAtual:"25/06 08:38 - CANCELADO",resumoNotion:null},
+    {nr:"202634346",cod:"16415",cliente:"Agiliza Administradora de Recebíveis",resp:"LUIZ FELIPE ANTONIACOMI",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"EM_ANDAMENTO",fase:"MIGRAÇÃO PLANILHA/BASE",alarme:"PROJETO EM ANDAMENTO FORA DA TIMEBOX",dtSerial:45807,pct:28.01,prevSerial:46097,prioridade:"NORMAL",posicaoAtual:"02/06 11:06 - NOVA DEMANDA DE CÁLCULOS QUE NASCEU UM NOVO ORÇAMENTO. ISSO É PRÉ-REQUISITO PARA VIRADA EM PRODUÇÃO. ANALISAR COM ANA DO PMO.",resumoNotion:null},
+    {nr:"202639115",cod:"12636",cliente:"CORREA & BORDA ADVOGADOS",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"UPGRADE",status:"SUSPENSO TEMPOR.",fase:"N.INFO",alarme:"SUSPENSO A PEDIDO DO CLIENTE",dtSerial:45824,pct:null,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"23/03 13:35 - DR. ALCIDES PEDIU A SUSPENSÃO DO PROJETO POR ESTAR COM PROBLEMAS DE SAÚDE NA FAMÍLIA.",resumoNotion:null},
+    {nr:"202485520",cod:"10127",cliente:"Castro Jr. - Sociedade de Advogados",resp:"EDERCION LUIZ KOMINCKI",produto:"CPJ-3C",sub:"UPGRADE",status:"AGUARDANDO CLIENTE",fase:"ATENDIMENTO 3",alarme:"PROJETO EM ANDAMENTO FORA DA TIMEBOX",dtSerial:45859,pct:80.28,prevSerial:45926,prioridade:"NORMAL",posicaoAtual:"27/05 09:23 - PMO ENVIOU SUGESTÃO DE DATA PARA ATENDIMENTO.",resumoNotion:null},
+    {nr:"202659821",cod:"46510",cliente:"CARDOSO ADVOCACIA",resp:"IMPLEMENTAÇÃO PROCESSUAL",produto:"CPJ-3C",sub:"JORNADA",status:"SUSPENSO TEMPOR.",fase:"N.INFO",alarme:"SUSPENSO A PEDIDO DO CLIENTE",dtSerial:45903,pct:93.47,prevSerial:46065,prioridade:"NORMAL",posicaoAtual:"30/01 - CLIENTE SOLICITOU PAUSA NO PROJETO. E-MAIL ENVIADO SOLICITANDO APOIO AO CS E DIRETORIA.",resumoNotion:null},
+    {nr:"202678710",cod:"46596",cliente:"Companhia de Navegação Norsul",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:45961,pct:21.61,prevSerial:46203,prioridade:"NORMAL",posicaoAtual:"25/06 08:38 - SUGERIDA DATA PARA ÚLTIMO ATENDIMENTO COM O CLIENTE.",resumoNotion:null},
+    {nr:"202685781",cod:"46668",cliente:"SBCLAW",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"ENTERPRISE",status:"AGUARDANDO PIL",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:45982,pct:null,prevSerial:46260,prioridade:"NORMAL",posicaoAtual:"17/06 14:28 - CLIENTE EM MIGRAÇÃO.",resumoNotion:null},
+    {nr:"202690141",cod:"44676",cliente:"GRÁFICA E EDITORA POSIGRAF LTDA",resp:"LUCAS GONCALVES CARNEIRO",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"AGUARDANDO CLIENTE",fase:"CONFIG/DADOS/ACADEMY",alarme:"PROJETO EM ANDAMENTO DENTRO DA TIMEBOX",dtSerial:45995,pct:51.26,prevSerial:46118,prioridade:"MÁXIMA",posicaoAtual:"16/06 10:11 - VIRADA REALIZADA EM 11/05, PORÉM CLIENTE NÃO ESTÁ ENGAJADO POIS MAPEOU NECESSIDADE DE INTEGRAÇÃO COM ITAÚ. INTEGRAÇÃO EM DESENVOLVIMENTO.",resumoNotion:null},
+    {nr:"202695015",cod:"45670",cliente:"ROCHA, MARINHO E SALES SOC. DE ADVOGADOS",resp:"ANNA FLORA C. DE OLIVEIRA",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EM_ANDAMENTO",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46022,pct:null,prevSerial:46118,prioridade:"NORMAL",posicaoAtual:"",resumoNotion:null},
+    {nr:"2026004571",cod:"1010",cliente:"Cavalcante & Pereira Advogados Assoc.",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"UPGRADE",status:"AGUARDANDO PIL",fase:"AGUARD. PROJETO COMPLEMENTAR",alarme:"N.INFO",dtSerial:46048,pct:35.14,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"17/06 14:22 - AGUARDANDO JUNÇÃO DE BASES.",resumoNotion:null},
+    {nr:"2026016020",cod:"46513",cliente:"ADVOCACIA DANIEL GERBER",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EM_ANDAMENTO",fase:"ENCERRAMENTO",alarme:"N.INFO",dtSerial:46083,pct:85.42,prevSerial:46203,prioridade:"NORMAL",posicaoAtual:"17/06 14:29 - ATENDIMENTO FINAL AGENDADO COM O CLIENTE.",resumoNotion:null},
+    {nr:"2026020536",cod:"46879",cliente:"Pimenta & Pimenta Advocacia Empresarial",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46101,pct:38.19,prevSerial:46139,prioridade:"NORMAL",posicaoAtual:"25/06 11:18 - ATENDIMENTO 3 - 30/06 ÀS 14H.",resumoNotion:null},
+    {nr:"2026022632",cod:"46474",cliente:"KHELLEN ALENCAR SOC. IND. DE ADVOCACIA",resp:"LUCAS GONCALVES CARNEIRO",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"AGUARDANDO PIL",fase:"PROJETO NOVO",alarme:"PROJETO EM ANDAMENTO DENTRO DA TIMEBOX",dtSerial:46107,pct:5,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"24/06 16:00 - INICIAR CRIAÇÃO DE BASE DO CLIENTE NA V3. REUNIÃO COM CREDOR (ITOP) MARCADA PARA 25/06.",resumoNotion:null},
+    {nr:"2026023810",cod:"46903",cliente:"Mariana Rodrigues da Cunha Bichuette Soc. Adv.",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46112,pct:54.72,prevSerial:46152,prioridade:"NORMAL",posicaoAtual:"10/06 12:13 - ATENDIMENTO 6 - 12/06 ÀS 14H.",resumoNotion:null},
+    {nr:"2026024027",cod:"46910",cliente:"Converty Recuperadora de Ativos",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"EM_ANDAMENTO",fase:"ENCERRAMENTO",alarme:"N.INFO",dtSerial:46112,pct:48.47,prevSerial:46203,prioridade:"NORMAL",posicaoAtual:"25/06 08:40 - CLIENTE SOLICITOU EXCLUSÃO DA BASE E VAI FAZER NOVA CARGA PELO 82. AGUARDANDO RETORNO.",resumoNotion:null},
+    {nr:"2026024368",cod:"46907",cliente:"FORTES & FORTES RECUPERAÇÃO DE CRÉDITO LTDA",resp:"LUIZ FELIPE ANTONIACOMI",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"EM_ANDAMENTO",fase:"PROJETO NOVO",alarme:"PROJETO EM ANDAMENTO DENTRO DA TIMEBOX",dtSerial:46113,pct:2.48,prevSerial:46195,prioridade:"NORMAL",posicaoAtual:"02/06 13:46 - BASE SICOOB: TERMO DE ACEITE ENVIADO, PMO ACOMPANHANDO. BASE CRESOL NÃO RECEBIDA AINDA.",resumoNotion:null},
+    {nr:"2026024484",cod:"46890",cliente:"FORTES E FORTES ADVOGADOS",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"ENTERPRISE",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46113,pct:null,prevSerial:46213,prioridade:"NORMAL",posicaoAtual:"24/06 14:24 - EM ATENDIMENTOS PÓS MIGRAÇÃO.",resumoNotion:"Go Live realizado em 22/06/2026 (migração DataJuris + CobMais → CPJ-3C). Cliente em fase intensiva de atendimentos pós-migração (6 reuniões após a virada). Encadeamentos implementados: petição inicial, averbação (RCI/RCVA/CIRETRAN), acordos, preparo recursal, emissão de guias. Pontos abertos: envio de rotinas pendentes pelo Dr. Diogo, ajuste de prazos, validação de tarefas legadas. Atenção: intensidade de atendimentos sugere possível lacuna entre expectativas do cliente e configuração entregue."},
+    {nr:"2026026493",cod:"17368",cliente:"Salume, Zanotelli, Scofield Advogados Assoc.",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"UPGRADE",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46120,pct:22.92,prevSerial:46203,prioridade:"NORMAL",posicaoAtual:"18/06 14:30 - CLIENTE EM ATENDIMENTOS PÓS UPGRADE.",resumoNotion:null},
+    {nr:"2026029709",cod:"26006",cliente:"LYX Participações e Empreendimentos LTDA",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"UPGRADE",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46134,pct:12.22,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"22/06 18:12 - ATENDIMENTO 4 - 29/06 ÀS 14H.",resumoNotion:null},
+    {nr:"2026029928",cod:"46841",cliente:"B.F.A Advogados",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"EM_ANDAMENTO",fase:"ENCERRAMENTO",alarme:"N.INFO",dtSerial:46136,pct:90.83,prevSerial:46203,prioridade:"NORMAL",posicaoAtual:"25/06 08:43 - CONFIGURAÇÕES FINALIZADAS. CLIENTE NÃO ENTROU NO ÚLTIMO ATENDIMENTO. EM TRATATIVAS COM O PMO.",resumoNotion:null},
+    {nr:"2026032188",cod:"39419",cliente:"Rui Carneiro Sampaio Soc. Ind. de Adv.",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46147,pct:79.44,prevSerial:46203,prioridade:"NORMAL",posicaoAtual:"25/06 08:43 - CLIENTE EM ATENDIMENTOS. AGUARDANDO RETORNO DE CONFIGURAÇÕES.",resumoNotion:null},
+    {nr:"2026032744",cod:"46954",cliente:"JULIO BROTTO SOC. IND. DE ADVOCACIA",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"EM ANDAMENTO",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46147,pct:19.44,prevSerial:46197,prioridade:"NORMAL",posicaoAtual:"11/05 08:54 - ONBOARDING 11/05 ÀS 10H.",resumoNotion:null},
+    {nr:"2026036447",cod:"46632",cliente:"MARCELO FRANCISQUINI SOC. IND. DE ADVOCACIA",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46163,pct:96.67,prevSerial:46220,prioridade:"NORMAL",posicaoAtual:"22/06 18:07 - AT.1 PÓS VIRADA 22/06; AT.2 24/06; AT.3 PÓS VIRADA 29/06 ÀS 10H.",resumoNotion:null},
+    {nr:"2026039099",cod:"46998",cliente:"CHAIA SOC. IND. DE ADVOCACIA",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46171,pct:31.25,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"22/06 17:46 - ATENDIMENTO 4 - 25/06 ÀS 16H.",resumoNotion:null},
+    {nr:"2026039394",cod:"47004",cliente:"ALVES ATHAIDE SERV. DE COBRANÇA E RECUPERAÇÃO",resp:"LUCAS GONCALVES CARNEIRO",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"NOVO",fase:"PROJETO NOVO",alarme:"PROJETO EM ANDAMENTO DENTRO DA TIMEBOX",dtSerial:46171,pct:0,prevSerial:46237,prioridade:"NORMAL",posicaoAtual:"24/06 16:03 - DADOS IMPORTADOS EM 17/06 E HOMOLOGADOS EM 19/06. AGUARDANDO PLANILHA DE ACORDOS.",resumoNotion:null},
+    {nr:"2026039726",cod:"47002",cliente:"33.179.058 BEATRIZ APARECIDA DE ALMEIDA",resp:"LUCAS GONCALVES CARNEIRO",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"NOVO",fase:"PROJETO NOVO",alarme:"PROJETO EM ANDAMENTO DENTRO DA TIMEBOX",dtSerial:46171,pct:7.08,prevSerial:46241,prioridade:"NORMAL",posicaoAtual:"16/06 10:33 - REUNIÃO DE BRIEFING REALIZADA EM 12/06. AGUARDANDO CLIENTE ENVIAR OS DADOS.",resumoNotion:null},
+    {nr:"2026039617",cod:"46995",cliente:"SEIXAS LIMA E BREHMER ADVOGADOS ASSOC.",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46174,pct:45.42,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"23/06 09:29 - ATENDIMENTO 3 - 26/06 ÀS 14H.",resumoNotion:null},
+    {nr:"2026039660",cod:"47005",cliente:"RCM Advogados Associados",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"NOVO",fase:"PROJETO NOVO",alarme:"N.INFO",dtSerial:46174,pct:0.42,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"01/06 22:23 - PROJETO DISTRIBUÍDO PARA IMPLEMENTADORA EM 01/06/2026.",resumoNotion:null},
+    {nr:"2026039824",cod:"46999",cliente:"ARRIGHI ADVOGADOS E ASSOCIADOS",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"AGUARDANDO PIL",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46174,pct:19.44,prevSerial:46233,prioridade:"NORMAL",posicaoAtual:"25/06 08:44 - AGUARDANDO PROJETO DE MIGRAÇÃO.",resumoNotion:null},
+    {nr:"2026039960",cod:"47010",cliente:"BECKHAUSER, KROETZ & SÓCIOS ADV.",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"AND_ATENDIMENTOS",fase:"ATENDIMENTOS",alarme:"N.INFO",dtSerial:46174,pct:24.17,prevSerial:46218,prioridade:"NORMAL",posicaoAtual:"25/06 08:44 - AGUARDANDO INFORMAÇÕES PARA ANÁLISE DE PERSONALIZAÇÃO DE FLUXO.",resumoNotion:null},
+    {nr:"2026040384",cod:"46994",cliente:"PACHECO PRATES & LAMACHIA ADVOGADOS ASSOC.",resp:"PRISCILA ANTUNES",produto:"CPJ-3C",sub:"JORNADA",status:"AGUARDANDO PIL",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46175,pct:23.61,prevSerial:46233,prioridade:"NORMAL",posicaoAtual:"25/06 08:45 - AGUARDANDO PROJETO DE MIGRAÇÃO.",resumoNotion:null},
+    {nr:"2026040340",cod:"47012",cliente:"Ronaldo Ermelindo Ferreira",resp:"MATTEUS LIMA DA SILVA",produto:"CPJ-3C",sub:"JORNADA",status:"AGUARDANDO PIL",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46176,pct:31.67,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"26/06 11:18 - AGUARDANDO PROJETO DE MIGRAÇÃO (ASTREA).",resumoNotion:null},
+    {nr:"2026041420",cod:"10076",cliente:"ESPINOLA, TEIXEIRA E BERTIN ADVOGADOS ASSOC.",resp:"LUCAS GONCALVES CARNEIRO",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"EM_ANDAMENTO",fase:"PROJETO NOVO",alarme:"PROJETO EM ANDAMENTO DENTRO DA TIMEBOX",dtSerial:46176,pct:0.28,prevSerial:46237,prioridade:"NORMAL",posicaoAtual:"09/06 15:22 - AGUARDANDO CORREÇÃO DE BUG DA V3 PARA IMPORTAR DADOS PARA A BASE.",resumoNotion:null},
+    {nr:"2026041708",cod:"22537",cliente:"SELETROAR - PR",resp:"MATTEUS LIMA DA SILVA",produto:"CPJ-3C",sub:"UPGRADE",status:"EM ANDAMENTO",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46178,pct:8.33,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"26/06 09:30 - AGUARDANDO AGENDAMENTO DE BRIEFING. PROJETO REDISTRIBUÍDO PARA MATTEUS.",resumoNotion:null},
+    {nr:"2026042758",cod:"47019",cliente:"ELIANA ROCHA SOC. IND. DE ADVOCACIA",resp:"CLAUDINE MAX STRAPASSON",produto:"CPJ-3C",sub:"JORNADA",status:"EM ANDAMENTO",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46184,pct:3.61,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"19/06 14:31 - BRIEFING 26/06 ÀS 16H; AT.1 01/07 ÀS 11H; AT.2 06/07 ÀS 11H; AT.3 09/07 ÀS 11H.",resumoNotion:null},
+    {nr:"2026043177",cod:"47030",cliente:"COSTA E SILVA ADVOGADOS ASSOCIADOS",resp:"MATTEUS LIMA DA SILVA",produto:"CPJ-3C",sub:"JORNADA",status:"EM ANDAMENTO",fase:"AGUARD. PROJETO MIGRAÇÃO",alarme:"N.INFO",dtSerial:46188,pct:30,prevSerial:null,prioridade:"NORMAL",posicaoAtual:"25/06 12:16 - PROJETO REDISTRIBUÍDO AO MATTEUS EM 25/06. BRIEFING 02/07 ÀS 10H; AT.1 10/07 ÀS 14H; AT.2 15/07 ÀS 10H; AT.3 20/07 ÀS 10H.",resumoNotion:null}
+  ]
+};
+
+let PORTFOLIO = JSON.parse(JSON.stringify(PORTFOLIO_SEED));
+
+function _excelDate(s){ return (s&&s>0) ? new Date((s-25569)*86400000) : null; }
+function _fmtDate(d){ if(!d) return '—'; if(!(d instanceof Date)) d=new Date(d); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
+function _diasAbertura(serial){ const d=_excelDate(serial); return d ? Math.floor((Date.now()-d.getTime())/86400000) : null; }
+
+function _shortName(name){
+  if(!name) return '—';
+  const m={'CLAUDINE MAX STRAPASSON':'Claudine','PRISCILA ANTUNES':'Priscila','ROSANE MARIA WELKER':'Rosane','EDERCION LUIZ KOMINCKI':'Edercion','LUIZ FELIPE ANTONIACOMI':'Luiz Felipe','LUCAS GONCALVES CARNEIRO':'Lucas','ANNA FLORA C. DE OLIVEIRA':'Anna Flora','MATTEUS LIMA DA SILVA':'Matteus','IMPLEMENTAÇÃO PROCESSUAL':'Equipe'};
+  return m[name.trim()] || name.trim().split(' ')[0];
+}
+function _fmtStatus(s){
+  const m={'EM_ANDAMENTO':'Em andamento','EM ANDAMENTO':'Em andamento','AND_ATENDIMENTOS':'Atendimentos','AGUARDANDO PIL':'Ag. Migração','AGUARDANDO CLIENTE':'Ag. Cliente','SUSPENSO TEMPOR.':'Suspenso temp.','SUSPENSO SEM RETORNO':'Suspenso s/ retorno','NOVO':'Novo'};
+  return m[s]||s;
+}
+
+function _alarmClass(p){
+  const a=p.alarme||'';
+  if(a.includes('FORA DA TIMEBOX')) return 'port-alarm-red';
+  if(a.includes('SUSPENSO')||p.status.includes('SUSPENSO')) return 'port-alarm-amber';
+  if(a.includes('DENTRO DA TIMEBOX')) return 'port-alarm-green';
+  return '';
+}
+function _alarmBadge(p){
+  const a=p.alarme||'';
+  if(a.includes('FORA DA TIMEBOX')) return `<span class="port-badge port-badge-red">🔴 Fora da Timebox</span>`;
+  if(a.includes('SUSPENSO')||p.status.includes('SUSPENSO')) return `<span class="port-badge port-badge-amber">⏸ Suspenso</span>`;
+  if(a.includes('AGUARDANDO OUTRO')) return `<span class="port-badge port-badge-amber">⏳ Ag. outro proj.</span>`;
+  if(a.includes('DENTRO DA TIMEBOX')) return `<span class="port-badge port-badge-green">✅ No prazo</span>`;
+  return `<span class="port-badge port-badge-gray">—</span>`;
+}
+
+function renderPortfolio(){
+  const content = document.getElementById('port-content');
+  if(!content) return;
+
+  const ps = PORTFOLIO.projects||[];
+  if(!ps.length){
+    content.innerHTML=`<div style="text-align:center;padding:48px;color:var(--text2);"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-size:16px;font-weight:700;margin-bottom:8px;">Nenhum projeto carregado</div><div style="font-size:13px;">Importe a planilha de portfólio para visualizar os projetos pendentes.</div></div>`;
+    return;
+  }
+
+  const respList=[...new Set(ps.map(p=>p.resp))].sort();
+  const prodList=[...new Set(ps.map(p=>p.produto))].sort();
+  const subList=[...new Set(ps.map(p=>p.sub))].sort();
+  const stList=[...new Set(ps.map(p=>p.status))].sort();
+
+  const fResp=document.getElementById('pf-resp')?.value||'';
+  const fProd=document.getElementById('pf-prod')?.value||'';
+  const fSub=document.getElementById('pf-sub')?.value||'';
+  const fSt=document.getElementById('pf-st')?.value||'';
+  const fQ=(document.getElementById('pf-q')?.value||'').toLowerCase().trim();
+
+  const filtered=ps.filter(p=>{
+    if(fResp && p.resp!==fResp) return false;
+    if(fProd && p.produto!==fProd) return false;
+    if(fSub && p.sub!==fSub) return false;
+    if(fSt && p.status!==fSt) return false;
+    if(fQ && !p.cliente.toLowerCase().includes(fQ) && !p.nr.includes(fQ)) return false;
+    return true;
+  });
+
+  const total=filtered.length;
+  const cpj3c=filtered.filter(p=>p.produto==='CPJ-3C').length;
+  const cobr=filtered.filter(p=>p.produto==='CPJ-COBRANÇA').length;
+  const criticos=filtered.filter(p=>(p.alarme||'').includes('FORA DA TIMEBOX')).length;
+  const suspensos=filtered.filter(p=>(p.alarme||'').includes('SUSPENSO')||p.status.includes('SUSPENSO')).length;
+
+  const byResp={};
+  filtered.forEach(p=>{ const n=_shortName(p.resp); byResp[n]=(byResp[n]||0)+1; });
+  const byRespHtml=Object.entries(byResp).sort((a,b)=>b[1]-a[1]).map(([n,c])=>
+    `<span style="background:var(--blue-bg);color:var(--blue-mid);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;">${n}: ${c}</span>`
+  ).join(' ');
+
+  const sorted=[...filtered].sort((a,b)=>{
+    const ac=(a.alarme||'').includes('FORA')?0:(((a.alarme||'').includes('SUSPENSO')||a.status.includes('SUSPENSO'))?2:1);
+    const bc=(b.alarme||'').includes('FORA')?0:(((b.alarme||'').includes('SUSPENSO')||b.status.includes('SUSPENSO'))?2:1);
+    if(ac!==bc) return ac-bc;
+    return (_diasAbertura(b.dtSerial)||0)-(_diasAbertura(a.dtSerial)||0);
+  });
+
+  const el=document.getElementById('port-updated');
+  if(el&&PORTFOLIO.updatedAt){const[y,m,d]=PORTFOLIO.updatedAt.split('-');el.textContent=`Planilha de ${d}/${m}/${y}`;}
+
+  let html=`
+  <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">${byRespHtml}</div>
+  <div class="port-kpis">
+    <div class="port-kpi"><div class="port-kpi-label">Total</div><div class="port-kpi-val">${total}</div></div>
+    <div class="port-kpi"><div class="port-kpi-label">CPJ-3C</div><div class="port-kpi-val" style="color:var(--blue-mid);">${cpj3c}</div></div>
+    <div class="port-kpi"><div class="port-kpi-label">CPJ-Cobrança</div><div class="port-kpi-val" style="color:var(--amber);">${cobr}</div></div>
+    <div class="port-kpi"><div class="port-kpi-label">🔴 Fora timebox</div><div class="port-kpi-val" style="color:var(--red);">${criticos}</div></div>
+    <div class="port-kpi"><div class="port-kpi-label">⏸ Suspensos</div><div class="port-kpi-val" style="color:var(--gray);">${suspensos}</div></div>
+  </div>
+  <div class="port-filter-bar">
+    <input id="pf-q" type="search" placeholder="🔍 Buscar cliente ou OS…" value="${fQ}" style="flex:1;min-width:160px;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;outline:none;background:var(--card);color:var(--text);" oninput="renderPortfolio()">
+    <select id="pf-resp" class="ki" style="min-width:130px;" onchange="renderPortfolio()">
+      <option value="">Todos responsáveis</option>
+      ${respList.map(r=>`<option value="${r}"${fResp===r?' selected':''}>${_shortName(r)}</option>`).join('')}
+    </select>
+    <select id="pf-prod" class="ki" style="min-width:110px;" onchange="renderPortfolio()">
+      <option value="">Todos produtos</option>
+      ${prodList.map(p=>`<option value="${p}"${fProd===p?' selected':''}>${p}</option>`).join('')}
+    </select>
+    <select id="pf-sub" class="ki" style="min-width:130px;" onchange="renderPortfolio()">
+      <option value="">Todas subcategorias</option>
+      ${subList.map(s=>`<option value="${s}"${fSub===s?' selected':''}>${s}</option>`).join('')}
+    </select>
+    <select id="pf-st" class="ki" style="min-width:130px;" onchange="renderPortfolio()">
+      <option value="">Todos status</option>
+      ${stList.map(s=>`<option value="${s}"${fSt===s?' selected':''}>${_fmtStatus(s)}</option>`).join('')}
+    </select>
+    <button onclick="['pf-q','pf-resp','pf-prod','pf-sub','pf-st'].forEach(id=>{const el=document.getElementById(id);if(el){el.tagName==='INPUT'?el.value='':el.selectedIndex=0;}});renderPortfolio();" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;">Limpar</button>
+  </div>
+  <div class="port-table-wrap">
+    <table class="port-table">
+      <thead><tr>
+        <th style="width:26px">#</th>
+        <th>Cliente</th>
+        <th>Produto</th>
+        <th>Tipo</th>
+        <th>Responsável</th>
+        <th>Abertura</th>
+        <th>Dias</th>
+        <th>Status</th>
+        <th>Alarme</th>
+        <th>Prev. Entrega</th>
+        <th style="width:28px"></th>
+      </tr></thead>
+      <tbody>
+  `;
+
+  sorted.forEach((p,i)=>{
+    const dtAb=_excelDate(p.dtSerial);
+    const dtPrev=_excelDate(p.prevSerial);
+    const dias=_diasAbertura(p.dtSerial);
+    const ac=_alarmClass(p);
+    const pctDisp=(p.pct!=null&&p.pct<=100)?Math.round(p.pct)+'%':(p.pct!=null&&p.pct>100)?'100%+':null;
+    html+=`
+    <tr class="${ac}" onclick="togglePortDetail('pd-${p.nr}')" style="cursor:pointer;">
+      <td style="font-size:11px;color:var(--text2);font-weight:600;">${i+1}</td>
+      <td>
+        <div style="font-weight:700;font-size:13px;line-height:1.3;">${p.cliente}</div>
+        <div style="font-size:10px;color:var(--text2);margin-top:1px;">OS ${p.nr} · Cód. ${p.cod}${p.resumoNotion?` <span style="color:var(--blue-mid);">📝</span>`:''}</div>
+      </td>
+      <td><span class="port-prod-tag ${p.produto==='CPJ-3C'?'port-prod-3c':'port-prod-cob'}">${p.produto}</span></td>
+      <td><span style="font-size:11px;color:var(--text2);">${p.sub}</span></td>
+      <td><span style="font-size:12px;font-weight:600;">${_shortName(p.resp)}</span></td>
+      <td><span style="font-size:12px;">${_fmtDate(dtAb)}</span></td>
+      <td><span style="font-size:15px;font-weight:800;${dias!=null&&dias>90?'color:var(--red)':dias!=null&&dias>45?'color:var(--amber)':'color:var(--text)'}">${dias!=null?dias:'—'}</span></td>
+      <td><span style="font-size:11px;">${_fmtStatus(p.status)}</span>${pctDisp?`<div style="font-size:10px;color:var(--text2);">${pctDisp}</div>`:''}</td>
+      <td>${_alarmBadge(p)}</td>
+      <td><span style="font-size:12px;">${_fmtDate(dtPrev)}</span></td>
+      <td style="font-size:18px;text-align:center;color:var(--text2);transition:transform .15s;" id="arr-${p.nr}">›</td>
+    </tr>
+    <tr id="pd-${p.nr}" style="display:none;" class="${ac}">
+      <td colspan="11" style="padding:0;">
+        <div class="port-detail">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px;">
+            <div><span class="port-detail-label">Fase</span><div style="font-size:13px;font-weight:600;">${p.fase||'—'}</div></div>
+            ${pctDisp?`<div><span class="port-detail-label">% Conclusão</span><div style="font-size:13px;font-weight:600;">${pctDisp}</div></div>`:''}
+            <div><span class="port-detail-label">Prioridade</span><div style="font-size:13px;font-weight:600;">${p.prioridade||'—'}</div></div>
+            ${dtPrev?`<div><span class="port-detail-label">Previsão Entrega</span><div style="font-size:13px;font-weight:600;">${_fmtDate(dtPrev)}</div></div>`:''}
+          </div>
+          ${p.posicaoAtual?`<div style="margin-bottom:10px;"><span class="port-detail-label">Última Posição</span><div style="font-size:12px;line-height:1.5;color:var(--text);white-space:pre-wrap;">${p.posicaoAtual}</div></div>`:''}
+          ${p.resumoNotion?`<div style="background:var(--blue-bg);border-radius:8px;padding:10px 14px;margin-top:8px;"><div style="font-size:10px;font-weight:700;color:var(--blue-mid);letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;">📝 Resumo Executivo · Notion</div><div style="font-size:12px;line-height:1.6;color:var(--text);">${p.resumoNotion}</div></div>`:''}
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  html+=`</tbody></table></div>`;
+  content.innerHTML=html;
+}
+
+function togglePortDetail(id){
+  const row=document.getElementById(id);
+  if(!row) return;
+  const nr=id.replace('pd-','');
+  const arr=document.getElementById('arr-'+nr);
+  const isOpen=row.style.display!=='none';
+  document.querySelectorAll('[id^="pd-"]').forEach(r=>r.style.display='none');
+  document.querySelectorAll('[id^="arr-"]').forEach(a=>{if(a)a.style.transform='';});
+  if(!isOpen){ row.style.display=''; if(arr) arr.style.transform='rotate(90deg)'; }
+}
+
+function importPortfolioExcel(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+      if(rows.length<2){alert('Planilha vazia ou inválida.');return;}
+      const headers=rows[0].map(h=>(h||'').toString().trim());
+      function gi(name){return headers.indexOf(name);}
+      const iNr=gi('Nr. Tarefa'),iCod=gi('Cód. Cliente'),iCli=gi('Nome Cliente'),iResp=gi('Responsável');
+      const iProd=gi('Produto'),iSub=gi('Subcategoria'),iSt=gi('Status'),iFase=gi('TAG Fase');
+      const iAlar=gi('TAG Alarme'),iDt=gi('Data'),iPct=gi('%Conclusão'),iPrev=gi('Previsão Entrega');
+      const iPri=gi('Prioridade'),iPos=gi('Posição Atual'),iGrp=gi('Grupo Status');
+      const projects=[];
+      for(let i=1;i<rows.length;i++){
+        const r=rows[i];
+        const cli=r[iCli];if(!cli) continue;
+        const nrStr=String(r[iNr]||'');
+        const existing=PORTFOLIO.projects.find(p=>p.nr===nrStr);
+        const prevRaw=r[iPrev];
+        projects.push({
+          nr:nrStr,cod:String(r[iCod]||''),cliente:String(cli||'').trim(),
+          resp:String(r[iResp]||'').trim(),produto:String(r[iProd]||'').trim(),
+          sub:String(r[iSub]||'').trim(),status:String(r[iSt]||'').trim(),
+          grpStatus:String(r[iGrp]||'').trim(),fase:String(r[iFase]||'').trim(),
+          alarme:String(r[iAlar]||'').trim(),
+          dtSerial:typeof r[iDt]==='number'?r[iDt]:null,
+          pct:typeof r[iPct]==='number'?r[iPct]:null,
+          prevSerial:(typeof prevRaw==='number'&&prevRaw>0)?prevRaw:null,
+          prioridade:String(r[iPri]||'').trim(),posicaoAtual:String(r[iPos]||'').trim(),
+          resumoNotion:existing?.resumoNotion||null
+        });
+      }
+      const today=new Date().toISOString().split('T')[0];
+      PORTFOLIO={updatedAt:today,projects};
+      saveData();
+      renderPortfolio();
+      alert(`✅ ${projects.length} projetos importados com sucesso!`);
+    }catch(err){alert('Erro ao importar: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+  input.value='';
 }
 
 // ─── TEMA CLARO / ESCURO ────────────────────────────────────────────────────

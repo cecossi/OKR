@@ -103,6 +103,7 @@ html[data-theme="dark"] .kr-bar-wrap{background:#252840;}
 .port-badge-amber{background:var(--amber-bg);color:var(--amber);}
 .port-badge-green{background:var(--green-bg);color:var(--green);}
 .port-badge-gray{background:var(--gray-bg);color:var(--gray);}
+.port-badge-blue{background:var(--blue-bg);color:var(--blue-mid);}
 .port-prod-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;}
 .port-prod-3c{background:var(--blue-bg);color:var(--blue-mid);}
 .port-prod-cob{background:var(--amber-bg);color:var(--amber);}
@@ -460,6 +461,7 @@ body.apresentacao .obj-section { display:block !important; }
   <div class="tab" onclick="switchTab(3)">📊 Análise Mensal</div>
   <div class="tab" onclick="switchTab(4)">📋 Satisfação Go-Live</div>
   <div class="tab" onclick="switchTab(5)">📂 Portfólio</div>
+  <div class="tab" onclick="switchTab(6)">✅ Encerrados</div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 4px;">
     <span style="font-size:11px;color:var(--text2);font-weight:600;">📅 Ano:</span>
     <select class="ki" id="sel-ano-graficos" style="width:72px;padding:4px 6px;" onchange="updateCharts()"></select>
@@ -582,6 +584,30 @@ body.apresentacao .obj-section { display:block !important; }
     <div style="text-align:center;padding:48px;color:var(--text2);">
       <div style="font-size:40px;margin-bottom:12px;">📋</div>
       <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Carregando portfólio...</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJETOS ENCERRADOS NO MÊS -->
+<div class="obj-section" id="obj6">
+  <div class="obj-header" style="background:linear-gradient(135deg,#0d3320,#1a5c38);border-left:4px solid #2ecc71;">
+    <div class="obj-icon">✅</div>
+    <div>
+      <div class="obj-title" style="color:#fff;">Projetos Encerrados no Mês</div>
+      <div class="obj-sub" style="color:rgba(255,255,255,.65);">Executados e finalizados · atualizado via planilha Excel</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <select id="enc-mes-sel" onchange="renderEncerrados()" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;"></select>
+      <label style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">
+        📤 Importar Excel
+        <input type="file" accept=".xlsx" style="display:none" onchange="importEncerradosExcel(this)">
+      </label>
+    </div>
+  </div>
+  <div id="enc-content">
+    <div style="text-align:center;padding:48px;color:var(--text2);">
+      <div style="font-size:40px;margin-bottom:12px;">📋</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Carregando...</div>
     </div>
   </div>
 </div>
@@ -1256,6 +1282,7 @@ function switchTab(idx){
   if(idx===3) renderAnalysis();
   if(idx===4) renderSatisfacao();
   if(idx===5) renderPortfolio();
+  if(idx===6) renderEncerrados();
 }
 
 // ─── ANÁLISE MENSAL ───────────────────────────────────────────
@@ -1423,6 +1450,7 @@ function _applyData(data){
     defaultRefAno = parseInt(parts[1]) || OKR_YEAR;
   }
   if(data.portfolio) PORTFOLIO = data.portfolio;
+  if(data.encerrados) ENCERRADOS = data.encerrados;
   const el = document.getElementById('last-saved');
   if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
 }
@@ -1437,7 +1465,8 @@ function _buildPayload(extra){
     monthlyVals: MONTHLY_VALS,
     monthlyNotes: MONTHLY_NOTES,
     accessCode: authCodigo,
-    portfolio: PORTFOLIO
+    portfolio: PORTFOLIO,
+    encerrados: ENCERRADOS
   }, extra||{});
 }
 
@@ -1721,6 +1750,162 @@ function importPortfolioExcel(input){
       saveData();
       renderPortfolio();
       alert(`✅ ${projects.length} projetos importados com sucesso!`);
+    }catch(err){alert('Erro ao importar: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+
+// ─── ENCERRADOS NO MÊS ──────────────────────────────────────────────────────
+const ENCERRADOS_SEED = {
+  "Jun/2026": [
+    {nr:"202491652",cod:"45414",nome:"Crespo e Caires Advogados Associados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46181,resp:"Anderson Denk Domanski",hsVenda:43.08,hsExec:17.03},
+    {nr:"202691178",cod:"46696",nome:"Sobral & Stoco Sociedade de Advogados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:3.83,hsExec:0.60},
+    {nr:"202694382",cod:"46728",nome:"MAGLAW",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:4.63,hsExec:1.69},
+    {nr:"2026003068",cod:"26835",nome:"Bogo Advocacia e Consultoria",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"FINALIZADO",dataSerial:46176,resp:"Luiz Felipe Antoniacomi",hsVenda:3.00,hsExec:0.016},
+    {nr:"2026013230",cod:"46814",nome:"Oliveira e Boselli de Souza Advogados Associados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46188,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.27},
+    {nr:"2026013991",cod:"46808",nome:"Ceobaniuc Sociedade Individual de Advocacia",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"EXECUTADO",dataSerial:46174,resp:"Lucas Goncalves Carneiro",hsVenda:1.38,hsExec:0.11},
+    {nr:"2026015976",cod:"46513",nome:"Advocacia Daniel Gerber",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Tatiane Moreira Navarro",hsVenda:2.92,hsExec:0.009},
+    {nr:"2026016065",cod:"46513",nome:"Advocacia Daniel Gerber",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Tatiane Moreira Navarro",hsVenda:2.92,hsExec:0.007},
+    {nr:"2026020076",cod:"46873",nome:"Penido Machado e Meireles Sociedade de Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46185,resp:"Priscila Antunes",hsVenda:1.46,hsExec:1.45},
+    {nr:"2026021261",cod:"46868",nome:"R França Sociedade Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46198,resp:"Claudine Max Strapasson",hsVenda:1.71,hsExec:0.19},
+    {nr:"2026023914",cod:"46912",nome:"Galera Sociedade de Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46195,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.26},
+    {nr:"2026024281",cod:"46914",nome:"Adson A. A. Santos - Soc. Individual de Advocacia",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46190,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.30},
+    {nr:"2026029573",cod:"42720",nome:"André Teixeira, Rossi, Andrade & Saadi Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:1.96,hsExec:0.32},
+    {nr:"2026031982",cod:"45670",nome:"Rocha, Marinho e Sales Sociedade de Advogados",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"FINALIZADO",dataSerial:46192,resp:"Luiz Felipe Antoniacomi",hsVenda:1.75,hsExec:0.026},
+    {nr:"2026032084",cod:"46952",nome:"Calazans Rossi Advogados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Priscila Antunes",hsVenda:3.92,hsExec:0.24},
+    {nr:"2026034517",cod:"22687",nome:"Matos e Tanuri Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46188,resp:"Claudine Max Strapasson",hsVenda:1.04,hsExec:0.048},
+    {nr:"2026035696",cod:"46966",nome:"R.C. Melo Sociedade Individual",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46191,resp:"Priscila Antunes",hsVenda:2.96,hsExec:0.59},
+    {nr:"2026039099",cod:"46998",nome:"Chaia Sociedade Individual de Advocacia",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46202,resp:"Claudine Max Strapasson",hsVenda:1.46,hsExec:0.16}
+  ]
+};
+let ENCERRADOS = JSON.parse(JSON.stringify(ENCERRADOS_SEED));
+
+function _fmtHs(h){
+  if(h==null||h==='') return '—';
+  const n=parseFloat(h);
+  if(isNaN(n)||n===0) return '0h';
+  if(n<0.017) return '<1min';
+  if(n<1) return Math.round(n*60)+'min';
+  return n.toFixed(1).replace('.',',')+'h';
+}
+function _encDateStr(s){
+  if(!s) return '—';
+  const d=new Date((parseFloat(s)-25569)*86400000);
+  return ('0'+d.getUTCDate()).slice(-2)+'/'+('0'+(d.getUTCMonth()+1)).slice(-2);
+}
+function _encBadge(s){
+  const map={EXECUTADO:'port-badge-green',FINALIZADO:'port-badge-blue',CANCELADO:'port-badge-red'};
+  const lbl={EXECUTADO:'Executado',FINALIZADO:'Finalizado',CANCELADO:'Cancelado'};
+  return `<span class="port-badge ${map[s]||'port-badge-gray'}">${lbl[s]||s}</span>`;
+}
+
+function renderEncerrados(){
+  const content=document.getElementById('enc-content');
+  if(!content) return;
+  const sel=document.getElementById('enc-mes-sel');
+  const mMap={Jan:1,Fev:2,Mar:3,Abr:4,Mai:5,Jun:6,Jul:7,Ago:8,Set:9,Out:10,Nov:11,Dez:12};
+  const months=Object.keys(ENCERRADOS).sort((a,b)=>{
+    const [ma,ya]=a.split('/'); const [mb,yb]=b.split('/');
+    return (parseInt(yb)*12+(mMap[mb]||0))-(parseInt(ya)*12+(mMap[ma]||0));
+  });
+  if(sel){
+    const cur=sel.value;
+    sel.innerHTML=months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${m}</option>`).join('');
+    if(!sel.value&&months.length) sel.value=months[0];
+  }
+  const mes=sel?sel.value:(months[0]||'');
+  const ps=(ENCERRADOS[mes]||[]).slice().sort((a,b)=>a.dataSerial-b.dataSerial);
+  if(!ps.length){
+    content.innerHTML='<div style="text-align:center;padding:48px;color:var(--text2);">Nenhum projeto para este mês.</div>';
+    return;
+  }
+  const total=ps.length;
+  const exec=ps.filter(p=>p.status==='EXECUTADO').length;
+  const fin=ps.filter(p=>p.status==='FINALIZADO').length;
+  const canc=ps.filter(p=>p.status==='CANCELADO').length;
+  const c3c=ps.filter(p=>p.produto==='CPJ-3C').length;
+  const ccob=ps.filter(p=>p.produto==='CPJ-COBRANÇA').length;
+  const hsVT=ps.reduce((s,p)=>s+(parseFloat(p.hsVenda)||0),0);
+  const hsET=ps.reduce((s,p)=>s+(parseFloat(p.hsExec)||0),0);
+  const rows=ps.map(p=>`<tr>
+    <td style="white-space:nowrap;">${_encDateStr(p.dataSerial)}</td>
+    <td style="font-size:10px;color:var(--text2);">${p.nr}</td>
+    <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.nome}">${p.nome}</td>
+    <td><span class="port-prod-tag ${p.produto==='CPJ-3C'?'port-prod-3c':'port-prod-cob'}">${p.produto==='CPJ-3C'?'CPJ-3C':'COB'}</span></td>
+    <td style="font-size:11px;">${p.sub}</td>
+    <td>${_encBadge(p.status)}</td>
+    <td style="font-size:11px;">${p.resp||'—'}</td>
+    <td style="text-align:right;font-size:11px;">${_fmtHs(p.hsVenda)}</td>
+    <td style="text-align:right;font-size:11px;color:${parseFloat(p.hsExec)<0.1?'var(--red)':'inherit'}">${_fmtHs(p.hsExec)}</td>
+  </tr>`).join('');
+  content.innerHTML=`
+    <div class="port-kpis" style="padding:14px 14px 0">
+      <div class="port-kpi"><div class="port-kpi-label">Total</div><div class="port-kpi-val">${total}</div></div>
+      <div class="port-kpi"><div class="port-kpi-label">Executados</div><div class="port-kpi-val" style="color:var(--green)">${exec}</div></div>
+      <div class="port-kpi"><div class="port-kpi-label">Finalizados</div><div class="port-kpi-val" style="color:var(--blue-mid)">${fin}</div></div>
+      <div class="port-kpi"><div class="port-kpi-label">Cancelados</div><div class="port-kpi-val" style="color:var(--red)">${canc}</div></div>
+      <div class="port-kpi"><div class="port-kpi-label">CPJ-3C</div><div class="port-kpi-val">${c3c}</div></div>
+      <div class="port-kpi"><div class="port-kpi-label">CPJ-Cob.</div><div class="port-kpi-val">${ccob}</div></div>
+      <div class="port-kpi"><div class="port-kpi-label">HS Vendidas</div><div class="port-kpi-val" style="font-size:18px;">${hsVT.toFixed(1).replace('.',',')}h</div></div>
+      <div class="port-kpi"><div class="port-kpi-label">HS Exec.</div><div class="port-kpi-val" style="font-size:18px;">${hsET.toFixed(1).replace('.',',')}h</div></div>
+    </div>
+    <div style="padding:14px;">
+      <div class="port-table-wrap">
+        <table class="port-table">
+          <thead><tr>
+            <th>Data</th><th>OS</th><th>Cliente</th><th>Produto</th>
+            <th>Subcategoria</th><th>Status</th><th>Responsável</th>
+            <th style="text-align:right">HS Vendida</th><th style="text-align:right">HS Exec.</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function importEncerradosExcel(input){
+  const file=(input.files||[])[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(raw.length<2){alert('Planilha vazia.');return;}
+      const mNames=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      const byMonth={};
+      for(let i=1;i<raw.length;i++){
+        const r=raw[i];
+        const dataSerial=parseFloat(r[12])||0;
+        if(!dataSerial) continue;
+        const dt=new Date((dataSerial-25569)*86400000);
+        const mes=mNames[dt.getUTCMonth()]+'/'+dt.getUTCFullYear();
+        const su=(r[14]||'').toString().toUpperCase();
+        const status=su.includes('CANCELADO')?'CANCELADO':su.includes('FINALIZADO')?'FINALIZADO':'EXECUTADO';
+        const p={
+          nr:(r[1]||'').toString().trim(),
+          cod:(r[2]||'').toString().trim(),
+          nome:(r[3]||'').toString().trim(),
+          produto:(r[5]||'').toString().trim(),
+          sub:(r[8]||'').toString().trim(),
+          status, dataSerial,
+          resp:((r[16]||'').toString().trim()||((r[17]||'').toString().trim())),
+          hsVenda:parseFloat(r[22])||0,
+          hsExec:parseFloat(r[23])||0
+        };
+        if(!p.nr) continue;
+        if(!byMonth[mes]) byMonth[mes]=[];
+        byMonth[mes].push(p);
+      }
+      const months=Object.keys(byMonth);
+      if(!months.length){alert('Nenhum projeto encontrado na planilha.');return;}
+      months.forEach(m=>{ ENCERRADOS[m]=byMonth[m]; });
+      saveData();
+      renderEncerrados();
+      const tot=months.reduce((s,m)=>s+byMonth[m].length,0);
+      alert(`✅ ${months.join(', ')}: ${tot} projeto${tot>1?'s':''} importado${tot>1?'s':''}!`);
     }catch(err){alert('Erro ao importar: '+err.message);}
   };
   reader.readAsArrayBuffer(file);

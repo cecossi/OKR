@@ -1450,7 +1450,14 @@ function _applyData(data){
     defaultRefAno = parseInt(parts[1]) || OKR_YEAR;
   }
   if(data.portfolio) PORTFOLIO = data.portfolio;
-  if(data.encerrados) ENCERRADOS = data.encerrados;
+  if(data.encerrados){
+    ENCERRADOS = data.encerrados;
+    const seedByNr={};
+    Object.values(ENCERRADOS_SEED).flat().forEach(p=>{if(p.nr) seedByNr[p.nr]=p;});
+    Object.values(ENCERRADOS).forEach(arr=>arr.forEach(p=>{
+      if(!p.resumoNotion && seedByNr[p.nr]?.resumoNotion) p.resumoNotion=seedByNr[p.nr].resumoNotion;
+    }));
+  }
   const el = document.getElementById('last-saved');
   if(el && data.savedAt) el.textContent = new Date(data.savedAt).toLocaleString('pt-BR');
 }
@@ -1708,6 +1715,16 @@ function togglePortDetail(id){
   document.querySelectorAll('[id^="arr-"]').forEach(a=>{if(a)a.style.transform='';});
   if(!isOpen){ row.style.display=''; if(arr) arr.style.transform='rotate(90deg)'; }
 }
+function toggleEncDetail(id){
+  const row=document.getElementById(id);
+  if(!row) return;
+  const nr=id.replace('ed-','');
+  const arr=document.getElementById('earr-'+nr);
+  const isOpen=row.style.display!=='none';
+  document.querySelectorAll('[id^="ed-"]').forEach(r=>r.style.display='none');
+  document.querySelectorAll('[id^="earr-"]').forEach(a=>{if(a)a.style.transform='';});
+  if(!isOpen){ row.style.display=''; if(arr) arr.style.transform='rotate(90deg)'; }
+}
 
 function importPortfolioExcel(input){
   const file=input.files[0];
@@ -1759,24 +1776,24 @@ function importPortfolioExcel(input){
 // ─── ENCERRADOS NO MÊS ──────────────────────────────────────────────────────
 const ENCERRADOS_SEED = {
   "Jun/2026": [
-    {nr:"202491652",cod:"45414",nome:"Crespo e Caires Advogados Associados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46181,resp:"Anderson Denk Domanski",hsVenda:43.08,hsExec:17.03},
-    {nr:"202691178",cod:"46696",nome:"Sobral & Stoco Sociedade de Advogados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:3.83,hsExec:0.60},
-    {nr:"202694382",cod:"46728",nome:"MAGLAW",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:4.63,hsExec:1.69},
-    {nr:"2026003068",cod:"26835",nome:"Bogo Advocacia e Consultoria",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"FINALIZADO",dataSerial:46176,resp:"Luiz Felipe Antoniacomi",hsVenda:3.00,hsExec:0.016},
-    {nr:"2026013230",cod:"46814",nome:"Oliveira e Boselli de Souza Advogados Associados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46188,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.27},
-    {nr:"2026013991",cod:"46808",nome:"Ceobaniuc Sociedade Individual de Advocacia",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"EXECUTADO",dataSerial:46174,resp:"Lucas Goncalves Carneiro",hsVenda:1.38,hsExec:0.11},
-    {nr:"2026015976",cod:"46513",nome:"Advocacia Daniel Gerber",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Tatiane Moreira Navarro",hsVenda:2.92,hsExec:0.009},
-    {nr:"2026016065",cod:"46513",nome:"Advocacia Daniel Gerber",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Tatiane Moreira Navarro",hsVenda:2.92,hsExec:0.007},
-    {nr:"2026020076",cod:"46873",nome:"Penido Machado e Meireles Sociedade de Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46185,resp:"Priscila Antunes",hsVenda:1.46,hsExec:1.45},
-    {nr:"2026021261",cod:"46868",nome:"R França Sociedade Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46198,resp:"Claudine Max Strapasson",hsVenda:1.71,hsExec:0.19},
-    {nr:"2026023914",cod:"46912",nome:"Galera Sociedade de Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46195,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.26},
-    {nr:"2026024281",cod:"46914",nome:"Adson A. A. Santos - Soc. Individual de Advocacia",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46190,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.30},
-    {nr:"2026029573",cod:"42720",nome:"André Teixeira, Rossi, Andrade & Saadi Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:1.96,hsExec:0.32},
-    {nr:"2026031982",cod:"45670",nome:"Rocha, Marinho e Sales Sociedade de Advogados",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"FINALIZADO",dataSerial:46192,resp:"Luiz Felipe Antoniacomi",hsVenda:1.75,hsExec:0.026},
-    {nr:"2026032084",cod:"46952",nome:"Calazans Rossi Advogados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Priscila Antunes",hsVenda:3.92,hsExec:0.24},
-    {nr:"2026034517",cod:"22687",nome:"Matos e Tanuri Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46188,resp:"Claudine Max Strapasson",hsVenda:1.04,hsExec:0.048},
-    {nr:"2026035696",cod:"46966",nome:"R.C. Melo Sociedade Individual",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46191,resp:"Priscila Antunes",hsVenda:2.96,hsExec:0.59},
-    {nr:"2026039099",cod:"46998",nome:"Chaia Sociedade Individual de Advocacia",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46202,resp:"Claudine Max Strapasson",hsVenda:1.46,hsExec:0.16}
+    {nr:"202491652",cod:"45414",nome:"Crespo e Caires Advogados Associados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46181,resp:"Anderson Denk Domanski",hsVenda:43.08,hsExec:17.03,resumoNotion:"Projeto Enterprise CPJ-3C de longa duração (iniciado em dez/2024). 286,6h executadas do total contratado. Sem registros de encerramento detalhados na página Notion."},
+    {nr:"202691178",cod:"46696",nome:"Sobral & Stoco Sociedade de Advogados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:3.83,hsExec:0.60,resumoNotion:"Go-live realizado em 27/04/2026. Encerramento formal em 21/05 com reunião de conclusão. Transição para CS em 18/06 com envio de Termo de Aceite via Contraktor. Atraso de ~24 dias úteis em relação ao cronograma original."},
+    {nr:"202694382",cod:"46728",nome:"MAGLAW",produto:"CPJ-3C",sub:"ENTERPRISE",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:4.63,hsExec:1.69,resumoNotion:"Go-Live em 04/05/2026 (Jornada Starter P1 — migração DataJuris). Atendimentos finalizados em 21/05. Múltiplos ajustes pós-migração realizados (Robô 102, grupos de trabalho). Saiu do CRM em 26/06."},
+    {nr:"2026003068",cod:"26835",nome:"Bogo Advocacia e Consultoria",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"FINALIZADO",dataSerial:46176,resp:"Luiz Felipe Antoniacomi",hsVenda:3.00,hsExec:0.016,resumoNotion:null},
+    {nr:"2026013230",cod:"46814",nome:"Oliveira e Boselli de Souza Advogados Associados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46188,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.27,resumoNotion:"Projeto concluído em 09/06 após 4 atendimentos. Desafio crítico resolvido: base recebida com 62 mil processos para cliente com apenas 2 mil ativos — dados corrigidos e reprocessados antes da implantação."},
+    {nr:"2026013991",cod:"46808",nome:"Ceobaniuc Sociedade Individual de Advocacia",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"EXECUTADO",dataSerial:46174,resp:"Lucas Goncalves Carneiro",hsVenda:1.38,hsExec:0.11,resumoNotion:null},
+    {nr:"2026015976",cod:"46513",nome:"Advocacia Daniel Gerber",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Tatiane Moreira Navarro",hsVenda:2.92,hsExec:0.009,resumoNotion:"Cancelado sem iniciar a migração. Carteira AMBEC dependia da conclusão das carteiras Criminal e Estratégico como pré-requisito, que nunca foram migradas. Backup da AMBEC nunca recebido pela equipe."},
+    {nr:"2026016065",cod:"46513",nome:"Advocacia Daniel Gerber",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Tatiane Moreira Navarro",hsVenda:2.92,hsExec:0.007,resumoNotion:"Cancelado. Carteira Criminal era pré-requisito não concluído para a migração desta carteira. Projeto encerrado sem início efetivo de implementação."},
+    {nr:"2026020076",cod:"46873",nome:"Penido Machado e Meireles Sociedade de Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46185,resp:"Priscila Antunes",hsVenda:1.46,hsExec:1.45,resumoNotion:"Jornada CPJ-3C com 7 etapas estruturadas, 5 concluídas. Atendimentos finalizados; saiu do CRM em 15/06. Aguardando projeto complementar para validação dos processos antes da go-live final."},
+    {nr:"2026021261",cod:"46868",nome:"R França Sociedade Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46198,resp:"Claudine Max Strapasson",hsVenda:1.71,hsExec:0.19,resumoNotion:"Encerrado em 01/06/2026 após 3 atendimentos consultivos finais. Acesso ao CPJ+ disponibilizado ao cliente. Times CriaAí e API Protocolo acionados para os treinamentos contratados."},
+    {nr:"2026023914",cod:"46912",nome:"Galera Sociedade de Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46195,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.26,resumoNotion:"Jornada CPJ-3C encerrado em 23/06. 3 atendimentos realizados, último em 16/06. Projeto concluído após configurações e treinamentos de uso do sistema."},
+    {nr:"2026024281",cod:"46914",nome:"Adson A. A. Santos - Soc. Individual de Advocacia",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46190,resp:"Claudine Max Strapasson",hsVenda:1.42,hsExec:0.30,resumoNotion:"Implementação concluída em 16/06/2026 com envio de Termo de Aceite via Contraktor. Transição para CS (Marcelo Cruz / Mauro Santos). Erros de discovery identificados na abertura foram corrigidos durante o projeto."},
+    {nr:"2026029573",cod:"42720",nome:"André Teixeira, Rossi, Andrade & Saadi Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46198,resp:"Priscila Antunes",hsVenda:1.96,hsExec:0.32,resumoNotion:"Atendimentos finalizados em 17/06. Implantação concluída com Termo de Aceite enviado em 19/06/2026. Ajuste de fluxo de publicações integradas realizado após o encerramento."},
+    {nr:"2026031982",cod:"45670",nome:"Rocha, Marinho e Sales Sociedade de Advogados",produto:"CPJ-COBRANÇA",sub:"JORNADA COBRANÇA",status:"FINALIZADO",dataSerial:46192,resp:"Luiz Felipe Antoniacomi",hsVenda:1.75,hsExec:0.026,resumoNotion:null},
+    {nr:"2026032084",cod:"46952",nome:"Calazans Rossi Advogados",produto:"CPJ-3C",sub:"ENTERPRISE",status:"CANCELADO",dataSerial:46189,resp:"Priscila Antunes",hsVenda:3.92,hsExec:0.24,resumoNotion:"Cancelado em 03/06/2026 por decisão formal do cliente, que manifestou desistência do sistema. CS assumiu o acompanhamento do encerramento contratual."},
+    {nr:"2026034517",cod:"22687",nome:"Matos e Tanuri Advogados",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46188,resp:"Claudine Max Strapasson",hsVenda:1.04,hsExec:0.048,resumoNotion:"Encerrado em 08/06 após 4 atendimentos (módulos CPJ, relatórios e monitoramento). Sistema movido para base zerada conforme requisição do cliente."},
+    {nr:"2026035696",cod:"46966",nome:"R.C. Melo Sociedade Individual",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46191,resp:"Priscila Antunes",hsVenda:2.96,hsExec:0.59,resumoNotion:"Go-Live em 30/05/2026 (migração do Astrea, 4.538 processos). Encerrado em 17/06 com Termo de Aceite enviado. Todos os serviços ativados: publicações, monitoramento e API."},
+    {nr:"2026039099",cod:"46998",nome:"Chaia Sociedade Individual de Advocacia",produto:"CPJ-3C",sub:"JORNADA",status:"EXECUTADO",dataSerial:46202,resp:"Claudine Max Strapasson",hsVenda:1.46,hsExec:0.16,resumoNotion:"4 atendimentos realizados (último em 25/06). Módulos ativados: Publicações, Monitoramento, Multifonte e Cria DOC. Atendimento adicional de ajuste de fluxo agendado para jul/2026."}
   ]
 };
 let ENCERRADOS = JSON.parse(JSON.stringify(ENCERRADOS_SEED));
@@ -1856,17 +1873,34 @@ function renderEncerrados(){
     `<span style="background:var(--blue-bg);color:var(--blue-mid);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;">${n}: ${c}</span>`
   ).join(' ');
 
-  const rows=ps.map(p=>`<tr>
+  const _seedRN={};
+  Object.values(ENCERRADOS_SEED).flat().forEach(s=>{if(s.nr) _seedRN[s.nr]=s.resumoNotion;});
+  const rows=ps.map(p=>{
+    const resumo=p.resumoNotion??_seedRN[p.nr]??null;
+    const hasN=!!resumo;
+    const rowAttr=hasN?`onclick="toggleEncDetail('ed-${p.nr}')" style="cursor:pointer;"`:'' ;
+    const notionIcon=hasN?` <span style="color:var(--blue-mid);">📝</span>`:'';
+    const arrCell=hasN?`<td style="font-size:18px;text-align:center;color:var(--text2);transition:transform .15s;" id="earr-${p.nr}">›</td>`:`<td></td>`;
+    const detailRow=hasN?`<tr id="ed-${p.nr}" style="display:none;">
+      <td colspan="10" style="padding:0;">
+        <div class="port-detail">
+          <div style="background:var(--blue-bg);border-radius:8px;padding:10px 14px;"><div style="font-size:10px;font-weight:700;color:var(--blue-mid);letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;">📝 Resumo Executivo · Notion</div><div style="font-size:12px;line-height:1.6;color:var(--text);">${resumo}</div></div>
+        </div>
+      </td>
+    </tr>`:'';
+    return `<tr ${rowAttr}>
     <td style="white-space:nowrap;">${_encDateStr(p.dataSerial)}</td>
     <td style="font-size:10px;color:var(--text2);">${p.nr}</td>
-    <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.nome}">${p.nome}</td>
+    <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.nome}">${p.nome}${notionIcon}</td>
     <td><span class="port-prod-tag ${p.produto==='CPJ-3C'?'port-prod-3c':'port-prod-cob'}">${p.produto==='CPJ-3C'?'CPJ-3C':'COB'}</span></td>
     <td style="font-size:11px;">${p.sub}</td>
     <td>${_encBadge(p.status)}</td>
     <td style="font-size:11px;">${_shortName(p.resp)}</td>
     <td style="text-align:right;font-size:11px;">${_fmtHs(p.hsVenda)}</td>
     <td style="text-align:right;font-size:11px;color:${parseFloat(p.hsExec)<0.1?'var(--red)':'inherit'}">${_fmtHs(p.hsExec)}</td>
-  </tr>`).join('');
+    ${arrCell}
+  </tr>${detailRow}`;
+  }).join('');
 
   content.innerHTML=`
     <div style="padding:14px 14px 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">${byRespHtml}</div>
@@ -1906,7 +1940,7 @@ function renderEncerrados(){
           <thead><tr>
             <th>Data</th><th>OS</th><th>Cliente</th><th>Produto</th>
             <th>Subcategoria</th><th>Status</th><th>Responsável</th>
-            <th style="text-align:right">HS Vendida</th><th style="text-align:right">HS Exec.</th>
+            <th style="text-align:right">HS Vendida</th><th style="text-align:right">HS Exec.</th><th></th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
@@ -1925,6 +1959,8 @@ function importEncerradosExcel(input){
       const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
       if(raw.length<2){alert('Planilha vazia.');return;}
       const mNames=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      const existingByNr={};
+      Object.values(ENCERRADOS).flat().forEach(ep=>{if(ep.nr) existingByNr[ep.nr]=ep;});
       const byMonth={};
       for(let i=1;i<raw.length;i++){
         const r=raw[i];
@@ -1934,8 +1970,9 @@ function importEncerradosExcel(input){
         const mes=mNames[dt.getUTCMonth()]+'/'+dt.getUTCFullYear();
         const su=(r[14]||'').toString().toUpperCase();
         const status=su.includes('CANCELADO')?'CANCELADO':su.includes('FINALIZADO')?'FINALIZADO':'EXECUTADO';
+        const nr=(r[1]||'').toString().trim();
         const p={
-          nr:(r[1]||'').toString().trim(),
+          nr,
           cod:(r[2]||'').toString().trim(),
           nome:(r[3]||'').toString().trim(),
           produto:(r[5]||'').toString().trim(),
@@ -1943,7 +1980,8 @@ function importEncerradosExcel(input){
           status, dataSerial,
           resp:((r[16]||'').toString().trim()||((r[17]||'').toString().trim())),
           hsVenda:parseFloat(r[22])||0,
-          hsExec:parseFloat(r[23])||0
+          hsExec:parseFloat(r[23])||0,
+          resumoNotion:existingByNr[nr]?.resumoNotion||null
         };
         if(!p.nr) continue;
         if(!byMonth[mes]) byMonth[mes]=[];

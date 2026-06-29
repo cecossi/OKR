@@ -1859,13 +1859,10 @@ function renderEncerrados(){
   });
 
   const total=ps.length;
-  const exec=ps.filter(p=>p.status==='EXECUTADO').length;
   const fin=ps.filter(p=>p.status==='FINALIZADO').length;
   const canc=ps.filter(p=>p.status==='CANCELADO').length;
   const c3c=ps.filter(p=>p.produto==='CPJ-3C').length;
   const ccob=ps.filter(p=>p.produto==='CPJ-COBRANÇA').length;
-  const hsVT=ps.reduce((s,p)=>s+(parseFloat(p.hsVenda)||0),0);
-  const hsET=ps.reduce((s,p)=>s+(parseFloat(p.hsExec)||0),0);
 
   const byResp={};
   ps.forEach(p=>{ const n=_shortName(p.resp); byResp[n]=(byResp[n]||0)+1; });
@@ -1906,13 +1903,10 @@ function renderEncerrados(){
     <div style="padding:14px 14px 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">${byRespHtml}</div>
     <div class="port-kpis" style="padding:0 14px 0">
       <div class="port-kpi"><div class="port-kpi-label">Total</div><div class="port-kpi-val">${total}</div></div>
-      <div class="port-kpi"><div class="port-kpi-label">Executados</div><div class="port-kpi-val" style="color:var(--green)">${exec}</div></div>
       <div class="port-kpi"><div class="port-kpi-label">Finalizados</div><div class="port-kpi-val" style="color:var(--blue-mid)">${fin}</div></div>
       <div class="port-kpi"><div class="port-kpi-label">Cancelados</div><div class="port-kpi-val" style="color:var(--red)">${canc}</div></div>
       <div class="port-kpi"><div class="port-kpi-label">CPJ-3C</div><div class="port-kpi-val">${c3c}</div></div>
       <div class="port-kpi"><div class="port-kpi-label">CPJ-Cob.</div><div class="port-kpi-val">${ccob}</div></div>
-      <div class="port-kpi"><div class="port-kpi-label">HS Vendidas</div><div class="port-kpi-val" style="font-size:18px;">${hsVT.toFixed(1).replace('.',',')}h</div></div>
-      <div class="port-kpi"><div class="port-kpi-label">HS Exec.</div><div class="port-kpi-val" style="font-size:18px;">${hsET.toFixed(1).replace('.',',')}h</div></div>
     </div>
     <div class="port-filter-bar" style="margin:10px 14px 0;">
       <input id="enc-q" type="search" placeholder="🔍 Buscar cliente ou OS…" value="${fQ}" style="flex:1;min-width:160px;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;outline:none;background:var(--card);color:var(--text);" oninput="renderEncerrados()">

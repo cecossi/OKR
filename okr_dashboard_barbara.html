@@ -1570,6 +1570,9 @@ function renderPortfolio(){
   const content = document.getElementById('port-content');
   if(!content) return;
 
+  const _pfqActive = document.activeElement?.id === 'pf-q';
+  const _pfqCursor = _pfqActive ? document.getElementById('pf-q')?.selectionStart : null;
+
   const ps = PORTFOLIO.projects||[];
   if(!ps.length){
     content.innerHTML=`<div style="text-align:center;padding:48px;color:var(--text2);"><div style="font-size:40px;margin-bottom:12px;">📋</div><div style="font-size:16px;font-weight:700;margin-bottom:8px;">Nenhum projeto carregado</div><div style="font-size:13px;">Importe a planilha de portfólio para visualizar os projetos pendentes.</div></div>`;
@@ -1719,6 +1722,7 @@ function renderPortfolio(){
 
   html+=`</tbody></table></div>`;
   content.innerHTML=html;
+  if(_pfqActive){ const q=document.getElementById('pf-q'); if(q){q.focus();q.setSelectionRange(_pfqCursor,_pfqCursor);} }
 }
 
 function togglePortDetail(id){
@@ -1836,6 +1840,8 @@ function _encBadge(s){
 function renderEncerrados(){
   const content=document.getElementById('enc-content');
   if(!content) return;
+  const _encqActive = document.activeElement?.id === 'enc-q';
+  const _encqCursor = _encqActive ? document.getElementById('enc-q')?.selectionStart : null;
   const sel=document.getElementById('enc-mes-sel');
   const mMap={Jan:1,Fev:2,Mar:3,Abr:4,Mai:5,Jun:6,Jul:7,Ago:8,Set:9,Out:10,Nov:11,Dez:12};
   const months=Object.keys(ENCERRADOS).sort((a,b)=>{
@@ -1956,6 +1962,7 @@ function renderEncerrados(){
         </table>
       </div>
     </div>`;
+  if(_encqActive){ const q=document.getElementById('enc-q'); if(q){q.focus();q.setSelectionRange(_encqCursor,_encqCursor);} }
 }
 
 function importEncerradosExcel(input){

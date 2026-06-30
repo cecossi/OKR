@@ -1583,6 +1583,8 @@ function renderPortfolio(){
   const fSub=document.getElementById('pf-sub')?.value||'';
   const fSt=document.getElementById('pf-st')?.value||'';
   const fQ=(document.getElementById('pf-q')?.value||'').toLowerCase().trim();
+  const fDtIni=document.getElementById('pf-dt-ini')?.value||'';
+  const fDtFim=document.getElementById('pf-dt-fim')?.value||'';
 
   const filtered=ps.filter(p=>{
     if(fResp && p.resp!==fResp) return false;
@@ -1590,6 +1592,11 @@ function renderPortfolio(){
     if(fSub && p.sub!==fSub) return false;
     if(fSt && p.status!==fSt) return false;
     if(fQ && !p.cliente.toLowerCase().includes(fQ) && !p.nr.includes(fQ)) return false;
+    if(p.dtSerial){
+      const dtISO=new Date((p.dtSerial-25569)*86400000).toISOString().slice(0,10);
+      if(fDtIni && dtISO<fDtIni) return false;
+      if(fDtFim && dtISO>fDtFim) return false;
+    }
     return true;
   });
 
@@ -1642,7 +1649,13 @@ function renderPortfolio(){
       <option value="">Todos status</option>
       ${stList.map(s=>`<option value="${s}"${fSt===s?' selected':''}>${_fmtStatus(s)}</option>`).join('')}
     </select>
-    <button onclick="['pf-q','pf-resp','pf-prod','pf-sub','pf-st'].forEach(id=>{const el=document.getElementById(id);if(el){el.tagName==='INPUT'?el.value='':el.selectedIndex=0;}});renderPortfolio();" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;">Limpar</button>
+    <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;">
+      <span style="font-size:11px;color:var(--text2);white-space:nowrap;">Abertura:</span>
+      <input id="pf-dt-ini" type="date" onchange="renderPortfolio()" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);cursor:pointer;">
+      <span style="font-size:11px;color:var(--text2);">–</span>
+      <input id="pf-dt-fim" type="date" onchange="renderPortfolio()" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);cursor:pointer;">
+    </div>
+    <button onclick="['pf-q','pf-resp','pf-prod','pf-sub','pf-st','pf-dt-ini','pf-dt-fim'].forEach(id=>{const el=document.getElementById(id);if(el){el.tagName==='INPUT'?el.value='':el.selectedIndex=0;}});renderPortfolio();" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;">Limpar</button>
   </div>
   <div class="port-table-wrap">
     <table class="port-table">

@@ -1651,9 +1651,9 @@ function renderPortfolio(){
     </select>
     <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;">
       <span style="font-size:11px;color:var(--text2);white-space:nowrap;">Abertura:</span>
-      <input id="pf-dt-ini" type="date" onchange="renderPortfolio()" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);cursor:pointer;">
+      <input id="pf-dt-ini" type="date" value="${fDtIni}" onchange="renderPortfolio()" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);cursor:pointer;">
       <span style="font-size:11px;color:var(--text2);">–</span>
-      <input id="pf-dt-fim" type="date" onchange="renderPortfolio()" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);cursor:pointer;">
+      <input id="pf-dt-fim" type="date" value="${fDtFim}" onchange="renderPortfolio()" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);cursor:pointer;">
     </div>
     <button onclick="['pf-q','pf-resp','pf-prod','pf-sub','pf-st','pf-dt-ini','pf-dt-fim'].forEach(id=>{const el=document.getElementById(id);if(el){el.tagName==='INPUT'?el.value='':el.selectedIndex=0;}});renderPortfolio();" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;">Limpar</button>
   </div>

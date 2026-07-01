@@ -1537,7 +1537,7 @@ const PORTFOLIO_SEED = {
 let PORTFOLIO = JSON.parse(JSON.stringify(PORTFOLIO_SEED));
 
 function _excelDate(s){ return (s&&s>0) ? new Date((s-25569)*86400000) : null; }
-function _fmtDate(d){ if(!d) return '—'; if(!(d instanceof Date)) d=new Date(d); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
+function _fmtDate(d){ if(!d) return '—'; if(!(d instanceof Date)) d=new Date(d); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',timeZone:'UTC'}); }
 function _diasAbertura(serial){ const d=_excelDate(serial); return d ? Math.floor((Date.now()-d.getTime())/86400000) : null; }
 
 function _shortName(name){
